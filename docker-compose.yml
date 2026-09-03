@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    container_name: product-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://host.docker.internal:3306/product_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: sanjaysanthosh08
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
