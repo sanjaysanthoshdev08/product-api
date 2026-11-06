@@ -251,3 +251,134 @@ td button.link {
     display: none;
   }
 }
+
+/* ---------- Page 7: Home (black & white landing page) ---------- */
+.home {
+  --home-ink: #0b0b0b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--home-ink);
+  background-color: #f1f1f1;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 6px 6px;
+  font-family: "Inter Tight", "Inter", system-ui, "Segoe UI", sans-serif;
+}
+
+.home-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem clamp(1rem, 5vw, 4.5rem);
+}
+
+.home-nav-left,
+.home-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.home-brand {
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.home-brand sup {
+  font-size: 0.55em;
+}
+
+.home-nav nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.home-nav a,
+.home-login {
+  color: var(--home-ink);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.home-login {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+button.home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--home-ink);
+  color: #fff;
+  font-size: 0.82rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.home-hero {
+  text-align: center;
+  padding: clamp(1rem, 4vh, 3rem) 1rem 0;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.home-hero h1 {
+  font-size: clamp(2.2rem, 5.2vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-stretch: 75%;
+}
+
+.home-hero p {
+  margin: 0;
+  max-width: 34rem;
+  color: #3d3d3d;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.home-hands {
+  display: block;
+  width: 100%;
+  margin-top: auto;
+  /* blends the photo's pale background into the page texture */
+  mix-blend-mode: multiply;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
+}
+
+.home-trusted {
+  text-align: center;
+  padding: 1rem 1rem 1.5rem;
+}
+
+.home-trusted p {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: #3d3d3d;
+}
+
+.home-trusted ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem clamp(1.25rem, 4vw, 3.5rem);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+  .home-nav nav {
+    display: none;
+  }
+}

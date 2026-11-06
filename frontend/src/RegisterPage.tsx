@@ -6,9 +6,14 @@ import type { AuthResponse } from "./api";
 interface Props {
   onRegistered: (auth: AuthResponse) => void;
   onShowLogin: () => void;
+  onShowHome: () => void;
 }
 
-export default function RegisterPage({ onRegistered, onShowLogin }: Props) {
+export default function RegisterPage({
+  onRegistered,
+  onShowLogin,
+  onShowHome,
+}: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -88,6 +93,10 @@ export default function RegisterPage({ onRegistered, onShowLogin }: Props) {
           Already have an account?{" "}
           <button type="button" className="link" onClick={onShowLogin}>
             Sign in
+          </button>
+          {" · "}
+          <button type="button" className="link" onClick={onShowHome}>
+            Home
           </button>
         </p>
       </form>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { AuthResponse } from "./api";
 import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
+import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import ProductDetailsPage from "./ProductDetailsPage";
 import ProductsPage from "./ProductsPage";
@@ -20,7 +21,7 @@ function loadSession(): AuthResponse | null {
 
 export default function App() {
   const [session, setSession] = useState<AuthResponse | null>(loadSession);
-  const [view, setView] = useState<"login" | "register">("login");
+  const [view, setView] = useState<"home" | "login" | "register">("home");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [listPage, setListPage] = useState(0);
   const [adding, setAdding] = useState(false);
@@ -46,6 +47,7 @@ export default function App() {
     setListPage(0);
     setAdding(false);
     setEditingId(null);
+    setView("home");
   }
 
   if (session) {
@@ -91,15 +93,26 @@ export default function App() {
     );
   }
 
+  if (view === "home") {
+    return (
+      <HomePage
+        onLogin={() => setView("login")}
+        onTryNow={() => setView("register")}
+      />
+    );
+  }
+
   return view === "register" ? (
     <RegisterPage
       onRegistered={handleLogin}
       onShowLogin={() => setView("login")}
+      onShowHome={() => setView("home")}
     />
   ) : (
     <LoginPage
       onLogin={handleLogin}
       onShowRegister={() => setView("register")}
+      onShowHome={() => setView("home")}
     />
   );
 }
