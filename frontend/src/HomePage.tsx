@@ -3,66 +3,48 @@ interface Props {
   onTryNow: () => void;
 }
 
-// Placeholder names for the "Trusted by" row. Replace them with your real
-// customers before publishing.
-const TRUSTED = [
-  "MERCURY",
-  "ramp",
-  "HEX",
-  "Vercel",
-  "descript",
-  "Cash App",
-  "SUPERCELL",
-  "runway",
+// The stack this project is built with (shown in the footer row).
+const BUILT_WITH = [
+  "Spring Boot",
+  "MySQL",
+  "JWT Security",
+  "React",
+  "TypeScript",
+  "Vite",
 ];
 
 export default function HomePage({ onLogin, onTryNow }: Props) {
-  // The Insights / Solutions / Pricing links have no backend page yet, so
-  // they are visual placeholders for now.
-  const placeholder = (e: React.MouseEvent) => e.preventDefault();
-
   return (
     <div className="home">
       <header className="home-nav">
         <div className="home-nav-left">
           <span className="home-brand">
-            NEXORA<sup>®</sup>
+            Product<sup>API</sup>
           </span>
-          <nav aria-label="Main">
-            <a href="#insights" onClick={placeholder}>
-              Insights
-            </a>
-            <a href="#solutions" onClick={placeholder}>
-              Solutions
-            </a>
-            <a href="#pricing" onClick={placeholder}>
-              Pricing
-            </a>
-          </nav>
         </div>
         <div className="home-nav-right">
           <button type="button" className="home-login" onClick={onLogin}>
             Login
           </button>
           <button type="button" className="home-pill" onClick={onTryNow}>
-            Try Now
+            Sign Up
           </button>
         </div>
       </header>
 
       <main className="home-hero">
         <h1>
-          Bold Ideas That
+          Manage Your Products
           <br />
-          Start With Vision.
+          With Confidence.
         </h1>
         <p>
-          We help modern brands craft digital stories that
+          Browse, add, edit and track your product catalog,
           <br />
-          inspire action and drive results.
+          secured with sign-in and admin controls.
         </p>
         <button type="button" className="home-pill" onClick={onTryNow}>
-          Get In Touch <span aria-hidden="true">↗</span>
+          Get Started <span aria-hidden="true">↗</span>
         </button>
       </main>
 
@@ -73,9 +55,9 @@ export default function HomePage({ onLogin, onTryNow }: Props) {
       />
 
       <footer className="home-trusted">
-        <p>Trusted by teams of every scale</p>
+        <p>Built with</p>
         <ul>
-          {TRUSTED.map((name) => (
+          {BUILT_WITH.map((name) => (
             <li key={name}>{name}</li>
           ))}
         </ul>
