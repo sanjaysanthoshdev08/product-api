@@ -129,6 +129,43 @@ export async function createProduct(
   return res.json();
 }
 
+async function failWithAdminMessage(res: Response, action: string): Promise<never> {
+  const message =
+    res.status === 401
+      ? "Your session has expired. Please sign in again."
+      : res.status === 403
+        ? `Only an ADMIN can ${action}.`
+        : await readError(res);
+  throw new ApiError(res.status, message);
+}
+
+// PUT /api/v1/products/{id} (ADMIN only) -> 200 ProductResponse.
+export async function updateProduct(
+  token: string,
+  id: number,
+  input: ProductInput,
+): Promise<Product> {
+  const res = await fetch(`/api/v1/products/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) return failWithAdminMessage(res, "edit products");
+  return res.json();
+}
+
+// DELETE /api/v1/products/{id} (ADMIN only) -> 204 with no body.
+export async function deleteProduct(token: string, id: number): Promise<void> {
+  const res = await fetch(`/api/v1/products/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return failWithAdminMessage(res, "delete products");
+}
+
 export async function fetchProducts(
   token: string,
   page: number,

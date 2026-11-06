@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ApiError, fetchProducts } from "./api";
+import { ApiError, deleteProduct, fetchProducts } from "./api";
 import type { AuthResponse, ProductPage } from "./api";
 
 const PAGE_SIZE = 10;
@@ -10,6 +10,7 @@ interface Props {
   onPageChange: (page: number) => void;
   onSelectProduct: (id: number) => void;
   onAddProduct: () => void; // shown to ADMIN users only
+  onEditProduct: (id: number) => void; // ADMIN only
   onLogout: () => void;
 }
 
@@ -19,8 +20,12 @@ export default function ProductsPage({
   onPageChange,
   onSelectProduct,
   onAddProduct,
+  onEditProduct,
   onLogout,
 }: Props) {
+  const isAdmin = session.role === "ADMIN";
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [data, setData] = useState<ProductPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +62,35 @@ export default function ProductsPage({
 
   const products = data?.content ?? [];
 
+  async function handleDelete(id: number, name: string) {
+    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    setDeleteError(null);
+    setDeletingId(id);
+    try {
+      await deleteProduct(session.token, id);
+      // If that was the last row on this page, step back one page.
+      if (products.length === 1 && page > 0) {
+        onPageChange(page - 1);
+      } else {
+        setReloadKey((k) => k + 1);
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        onLogout();
+        return;
+      }
+      setDeleteError(
+        err instanceof TypeError
+          ? "Cannot reach the API. Is the backend running on port 8081?"
+          : err instanceof Error
+            ? err.message
+            : "Failed to delete product",
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="layout">
       <header className="topbar">
@@ -65,7 +99,7 @@ export default function ProductsPage({
           <span>
             {session.username} <small>({session.role})</small>
           </span>
-          {session.role === "ADMIN" && (
+          {isAdmin && (
             <button onClick={onAddProduct}>Add product</button>
           )}
           <button className="secondary" onClick={onLogout}>
@@ -86,6 +120,11 @@ export default function ProductsPage({
           <p className="state">No products found.</p>
         ) : (
           <>
+            {deleteError && (
+              <p className="error" role="alert">
+                {deleteError}
+              </p>
+            )}
             <table className={loading ? "dim" : undefined}>
               <thead>
                 <tr>
@@ -93,6 +132,7 @@ export default function ProductsPage({
                   <th>Description</th>
                   <th className="num">Price</th>
                   <th className="num">Quantity</th>
+                  {isAdmin && <th className="num">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -110,6 +150,23 @@ export default function ProductsPage({
                     <td>{p.description ?? "—"}</td>
                     <td className="num">{Number(p.price).toFixed(2)}</td>
                     <td className="num">{p.quantity}</td>
+                    {isAdmin && (
+                      <td className="num">
+                        <button
+                          className="secondary small"
+                          onClick={() => onEditProduct(p.id)}
+                        >
+                          Edit
+                        </button>{" "}
+                        <button
+                          className="secondary small danger"
+                          disabled={deletingId === p.id}
+                          onClick={() => handleDelete(p.id, p.name)}
+                        >
+                          {deletingId === p.id ? "Deleting…" : "Delete"}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
