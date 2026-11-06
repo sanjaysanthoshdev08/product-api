@@ -104,6 +104,7 @@ export default function App() {
         onAddProduct={() => setAdding(true)}
         onEditProduct={setEditingId}
         onLogout={handleLogout}
+        onHome={() => setAtHome(true)}
       />
     );
   }

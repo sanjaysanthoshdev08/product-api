@@ -12,6 +12,7 @@ interface Props {
   onAddProduct: () => void; // shown to ADMIN users only
   onEditProduct: (id: number) => void; // ADMIN only
   onLogout: () => void;
+  onHome: () => void;
 }
 
 export default function ProductsPage({
@@ -22,6 +23,7 @@ export default function ProductsPage({
   onAddProduct,
   onEditProduct,
   onLogout,
+  onHome,
 }: Props) {
   const isAdmin = session.role === "ADMIN";
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -94,7 +96,21 @@ export default function ProductsPage({
   return (
     <div className="layout">
       <header className="topbar">
-        <h1>Products</h1>
+        <div className="title">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onHome}
+            aria-label="Home"
+            title="Home"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 11l9-8 9 8" />
+              <path d="M5 10v10h5v-6h4v6h5V10" />
+            </svg>
+          </button>
+          <h1>Products</h1>
+        </div>
         <div className="user">
           <span>
             {session.username} <small>({session.role})</small>

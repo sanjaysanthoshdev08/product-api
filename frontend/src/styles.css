@@ -382,3 +382,22 @@ button.home-pill {
     display: none;
   }
 }
+
+/* Home icon button in the Products page header */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+button.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--border);
+  border-radius: 50%;
+}
