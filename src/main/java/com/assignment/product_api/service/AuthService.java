@@ -4,6 +4,7 @@ import com.assignment.product_api.dto.AuthResponse;
 import com.assignment.product_api.dto.LoginRequest;
 import com.assignment.product_api.dto.RegisterRequest;
 import com.assignment.product_api.entity.User;
+import com.assignment.product_api.exception.UsernameAlreadyExistsException;
 import com.assignment.product_api.repository.UserRepository;
 import com.assignment.product_api.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +36,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new UsernameAlreadyExistsException("Username already exists");
         }
 
         User user = new User();

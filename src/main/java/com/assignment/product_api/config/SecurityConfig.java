@@ -74,7 +74,10 @@ public class SecurityConfig {
                         // Public authentication endpoints
                         .requestMatchers(
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/login"
+                                "/api/v1/auth/login",
+                                // Error dispatch path: without this, real
+                                // status codes (400/403/...) become 401
+                                "/error"
                         ).permitAll()
 
                         // CREATE product -> ADMIN only
