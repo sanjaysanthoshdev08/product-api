@@ -322,7 +322,7 @@ button.home-pill {
 
 .home-hero {
   text-align: center;
-  padding: clamp(1rem, 4vh, 3rem) 1rem 0;
+  padding: clamp(2rem, 12vh, 7rem) 1rem 0;
   display: grid;
   justify-items: center;
   gap: 1rem;
