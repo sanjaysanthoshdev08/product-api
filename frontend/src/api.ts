@@ -96,6 +96,39 @@ export async function fetchProduct(
   return res.json();
 }
 
+export interface ProductInput {
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+}
+
+// POST /api/v1/products (ADMIN only) -> 201 ProductResponse.
+// 400 carries field messages; 403 means the user is not an ADMIN.
+export async function createProduct(
+  token: string,
+  input: ProductInput,
+): Promise<Product> {
+  const res = await fetch("/api/v1/products", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const message =
+      res.status === 401
+        ? "Your session has expired. Please sign in again."
+        : res.status === 403
+          ? "Only an ADMIN can add products."
+          : await readError(res);
+    throw new ApiError(res.status, message);
+  }
+  return res.json();
+}
+
 export async function fetchProducts(
   token: string,
   page: number,

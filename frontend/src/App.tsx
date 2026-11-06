@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AuthResponse } from "./api";
+import AddProductPage from "./AddProductPage";
 import LoginPage from "./LoginPage";
 import ProductDetailsPage from "./ProductDetailsPage";
 import ProductsPage from "./ProductsPage";
@@ -21,6 +22,7 @@ export default function App() {
   const [view, setView] = useState<"login" | "register">("login");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [listPage, setListPage] = useState(0);
+  const [adding, setAdding] = useState(false);
 
   function handleLogin(auth: AuthResponse) {
     try {
@@ -40,9 +42,19 @@ export default function App() {
     setSession(null);
     setSelectedId(null);
     setListPage(0);
+    setAdding(false);
   }
 
   if (session) {
+    if (adding) {
+      return (
+        <AddProductPage
+          session={session}
+          onDone={() => setAdding(false)}
+          onLogout={handleLogout}
+        />
+      );
+    }
     if (selectedId !== null) {
       return (
         <ProductDetailsPage
@@ -59,6 +71,7 @@ export default function App() {
         page={listPage}
         onPageChange={setListPage}
         onSelectProduct={setSelectedId}
+        onAddProduct={() => setAdding(true)}
         onLogout={handleLogout}
       />
     );

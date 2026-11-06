@@ -9,6 +9,7 @@ interface Props {
   page: number; // kept by App so Back from details returns to the same page
   onPageChange: (page: number) => void;
   onSelectProduct: (id: number) => void;
+  onAddProduct: () => void; // shown to ADMIN users only
   onLogout: () => void;
 }
 
@@ -17,6 +18,7 @@ export default function ProductsPage({
   page,
   onPageChange,
   onSelectProduct,
+  onAddProduct,
   onLogout,
 }: Props) {
   const [data, setData] = useState<ProductPage | null>(null);
@@ -63,6 +65,9 @@ export default function ProductsPage({
           <span>
             {session.username} <small>({session.role})</small>
           </span>
+          {session.role === "ADMIN" && (
+            <button onClick={onAddProduct}>Add product</button>
+          )}
           <button className="secondary" onClick={onLogout}>
             Log out
           </button>
