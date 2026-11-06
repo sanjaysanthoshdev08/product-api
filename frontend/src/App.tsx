@@ -26,6 +26,8 @@ export default function App() {
   const [listPage, setListPage] = useState(0);
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  // After signing in (or reloading while signed in) the user lands on Home.
+  const [atHome, setAtHome] = useState(true);
 
   function handleLogin(auth: AuthResponse) {
     try {
@@ -34,6 +36,7 @@ export default function App() {
       // storage unavailable: session lasts until reload
     }
     setSession(auth);
+    setAtHome(true);
   }
 
   function handleLogout() {
@@ -47,10 +50,22 @@ export default function App() {
     setListPage(0);
     setAdding(false);
     setEditingId(null);
+    setAtHome(true);
     setView("home");
   }
 
   if (session) {
+    if (atHome) {
+      return (
+        <HomePage
+          onLogin={() => {}}
+          onTryNow={() => {}}
+          username={session.username}
+          onOpenProducts={() => setAtHome(false)}
+          onLogout={handleLogout}
+        />
+      );
+    }
     if (editingId !== null) {
       return (
         <EditProductPage
