@@ -5,9 +5,10 @@ import type { AuthResponse } from "./api";
 
 interface Props {
   onLogin: (auth: AuthResponse) => void;
+  onShowRegister: () => void;
 }
 
-export default function LoginPage({ onLogin }: Props) {
+export default function LoginPage({ onLogin, onShowRegister }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,12 @@ export default function LoginPage({ onLogin }: Props) {
         <button type="submit" disabled={submitting}>
           {submitting ? "Signing in…" : "Sign in"}
         </button>
+        <p className="switch">
+          New here?{" "}
+          <button type="button" className="link" onClick={onShowRegister}>
+            Create an account
+          </button>
+        </p>
       </form>
     </main>
   );
