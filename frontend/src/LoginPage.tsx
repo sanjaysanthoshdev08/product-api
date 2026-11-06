@@ -34,7 +34,7 @@ export default function LoginPage({ onLogin, onShowRegister }: Props) {
   }
 
   return (
-    <main className="center">
+    <main className="center page-login">
       <form className="card login" onSubmit={handleSubmit}>
         <h1>Sign in</h1>
         <label>

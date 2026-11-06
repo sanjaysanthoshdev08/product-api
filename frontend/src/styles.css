@@ -1,24 +1,13 @@
+/* Light theme only (the dark-mode override was removed on purpose). */
 :root {
-  --bg: #f4f5f7;
+  --bg: #f4f7fc;
   --surface: #ffffff;
-  --text: #1c2330;
-  --muted: #5d6675;
-  --border: #dde1e7;
-  --accent: #2456d6;
-  --danger: #b3261e;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12151b;
-    --surface: #1b2029;
-    --text: #e8ebf0;
-    --muted: #9aa3b2;
-    --border: #2d3441;
-    --accent: #6b8cff;
-    --danger: #ff8a80;
-  }
+  --text: #1f2a44;
+  --muted: #5f6b85;
+  --border: #d9e1ef;
+  --accent: #3b6ef5;
+  --danger: #c2362e;
+  color-scheme: light;
 }
 
 * {
@@ -50,6 +39,11 @@ h1 {
   display: grid;
   place-items: center;
   padding: 16px;
+}
+
+/* Page 1: Sign in (soft sky-blue to lavender) */
+.page-login {
+  background: linear-gradient(135deg, #e3f0ff 0%, #f1e9ff 100%);
 }
 
 .login {
