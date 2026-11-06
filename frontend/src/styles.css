@@ -401,3 +401,9 @@ button.icon-btn {
   border-color: var(--border);
   border-radius: 50%;
 }
+
+/* Products page: textured white background */
+.page-products {
+  min-height: 100vh;
+  background: #f4f4f4 url("/products-bg.webp") center / cover fixed;
+}

@@ -94,6 +94,7 @@ export default function ProductsPage({
   }
 
   return (
+    <div className="page-products">
     <div className="layout">
       <header className="topbar">
         <div className="title">
@@ -212,6 +213,7 @@ export default function ProductsPage({
           </>
         )}
       </main>
+    </div>
     </div>
   );
 }
