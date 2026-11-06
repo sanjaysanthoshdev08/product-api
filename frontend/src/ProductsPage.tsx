@@ -6,11 +6,19 @@ const PAGE_SIZE = 10;
 
 interface Props {
   session: AuthResponse;
+  page: number; // kept by App so Back from details returns to the same page
+  onPageChange: (page: number) => void;
+  onSelectProduct: (id: number) => void;
   onLogout: () => void;
 }
 
-export default function ProductsPage({ session, onLogout }: Props) {
-  const [page, setPage] = useState(0);
+export default function ProductsPage({
+  session,
+  page,
+  onPageChange,
+  onSelectProduct,
+  onLogout,
+}: Props) {
   const [data, setData] = useState<ProductPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +93,15 @@ export default function ProductsPage({ session, onLogout }: Props) {
               <tbody>
                 {products.map((p) => (
                   <tr key={p.id}>
-                    <td>{p.name}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="link"
+                        onClick={() => onSelectProduct(p.id)}
+                      >
+                        {p.name}
+                      </button>
+                    </td>
                     <td>{p.description ?? "—"}</td>
                     <td className="num">{Number(p.price).toFixed(2)}</td>
                     <td className="num">{p.quantity}</td>
@@ -98,7 +114,7 @@ export default function ProductsPage({ session, onLogout }: Props) {
               <button
                 className="secondary"
                 disabled={loading || data?.first}
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                onClick={() => onPageChange(Math.max(0, page - 1))}
               >
                 Previous
               </button>
@@ -110,7 +126,7 @@ export default function ProductsPage({ session, onLogout }: Props) {
               <button
                 className="secondary"
                 disabled={loading || data?.last}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => onPageChange(page + 1)}
               >
                 Next
               </button>

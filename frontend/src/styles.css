@@ -97,6 +97,21 @@ button.secondary {
   border-color: var(--border);
 }
 
+.switch {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+button.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -170,6 +185,28 @@ th {
 .num {
   text-align: right;
   white-space: nowrap;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6rem 1.5rem;
+  margin: 0;
+}
+
+.details dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+td button.link {
+  text-align: left;
+  font-weight: 600;
 }
 
 .pager {

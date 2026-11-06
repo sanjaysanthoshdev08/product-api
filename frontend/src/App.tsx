@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { AuthResponse } from "./api";
 import LoginPage from "./LoginPage";
+import ProductDetailsPage from "./ProductDetailsPage";
 import ProductsPage from "./ProductsPage";
+import RegisterPage from "./RegisterPage";
 
 const STORAGE_KEY = "product-api-session";
 
@@ -16,6 +18,9 @@ function loadSession(): AuthResponse | null {
 
 export default function App() {
   const [session, setSession] = useState<AuthResponse | null>(loadSession);
+  const [view, setView] = useState<"login" | "register">("login");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [listPage, setListPage] = useState(0);
 
   function handleLogin(auth: AuthResponse) {
     try {
@@ -33,11 +38,41 @@ export default function App() {
       // ignore
     }
     setSession(null);
+    setSelectedId(null);
+    setListPage(0);
   }
 
-  return session ? (
-    <ProductsPage session={session} onLogout={handleLogout} />
+  if (session) {
+    if (selectedId !== null) {
+      return (
+        <ProductDetailsPage
+          session={session}
+          productId={selectedId}
+          onBack={() => setSelectedId(null)}
+          onLogout={handleLogout}
+        />
+      );
+    }
+    return (
+      <ProductsPage
+        session={session}
+        page={listPage}
+        onPageChange={setListPage}
+        onSelectProduct={setSelectedId}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  return view === "register" ? (
+    <RegisterPage
+      onRegistered={handleLogin}
+      onShowLogin={() => setView("login")}
+    />
   ) : (
-    <LoginPage onLogin={handleLogin} />
+    <LoginPage
+      onLogin={handleLogin}
+      onShowRegister={() => setView("register")}
+    />
   );
 }

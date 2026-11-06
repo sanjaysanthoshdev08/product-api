@@ -61,6 +61,41 @@ export async function login(
   return res.json();
 }
 
+// POST /api/v1/auth/register -> 201 { token, username, role }.
+// New accounts always get the USER role; 409 means the username is taken.
+export async function register(
+  username: string,
+  password: string,
+): Promise<AuthResponse> {
+  const res = await fetch("/api/v1/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  return res.json();
+}
+
+// GET /api/v1/products/{id} -> ProductResponse, or 404 with a message.
+export async function fetchProduct(
+  token: string,
+  id: number,
+  signal?: AbortSignal,
+): Promise<Product> {
+  const res = await fetch(`/api/v1/products/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal,
+  });
+  if (!res.ok) {
+    const message =
+      res.status === 401
+        ? "Your session has expired. Please sign in again."
+        : await readError(res);
+    throw new ApiError(res.status, message);
+  }
+  return res.json();
+}
+
 export async function fetchProducts(
   token: string,
   page: number,
