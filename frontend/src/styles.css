@@ -41,9 +41,9 @@ h1 {
   padding: 16px;
 }
 
-/* Page 1: Sign in (soft sky-blue to lavender) */
+/* Page 1: Sign in (textured white background image) */
 .page-login {
-  background: linear-gradient(135deg, #e3f0ff 0%, #f1e9ff 100%);
+  background: #f4f4f4 url("/products-bg.webp") center / cover fixed;
 }
 
 .login {
