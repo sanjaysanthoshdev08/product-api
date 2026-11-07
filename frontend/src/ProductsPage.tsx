@@ -112,6 +112,18 @@ export default function ProductsPage({
           </button>
           <h1>Products</h1>
         </div>
+        <nav className="page-nav">
+          <button type="button" className="nav-link" onClick={onHome}>
+            Home
+          </button>
+          <button
+            type="button"
+            className="nav-link active"
+            aria-current="page"
+          >
+            Products
+          </button>
+        </nav>
         <div className="user">
           <span>
             {session.username} <small>({session.role})</small>

@@ -27,14 +27,15 @@ export default function HomePage({
         <nav>
           <button
             type="button"
-            className="home-login"
+            className="nav-link active"
+            aria-current="page"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             Home
           </button>
           <button
             type="button"
-            className="home-login"
+            className="nav-link"
             onClick={signedIn ? onOpenProducts : onLogin}
           >
             Products
