@@ -86,7 +86,7 @@ export default function RegisterPage({
             {error}
           </p>
         )}
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="btn-black" disabled={submitting}>
           {submitting ? "Creating account…" : "Create account"}
         </button>
         <p className="switch">
