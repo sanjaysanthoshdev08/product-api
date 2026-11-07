@@ -483,6 +483,16 @@ button.icon-btn {
 .page-products button.icon-btn {
   color: #0b0b0b;
   border-color: #0b0b0b;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.page-products button.icon-btn:hover {
+  background: #0b0b0b;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 .page-products button:focus-visible {
