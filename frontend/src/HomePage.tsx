@@ -8,16 +8,6 @@ interface Props {
   onLogout?: () => void;
 }
 
-// The stack this project is built with (shown in the footer row).
-const BUILT_WITH = [
-  "Spring Boot",
-  "MySQL",
-  "JWT Security",
-  "React",
-  "TypeScript",
-  "Vite",
-];
-
 export default function HomePage({
   onLogin,
   onTryNow,
@@ -83,15 +73,6 @@ export default function HomePage({
         src="/home-hands.jpg"
         alt="A robotic hand reaching toward a human hand"
       />
-
-      <footer className="home-trusted">
-        <p>Built with</p>
-        <ul>
-          {BUILT_WITH.map((name) => (
-            <li key={name}>{name}</li>
-          ))}
-        </ul>
-      </footer>
     </div>
   );
 }
