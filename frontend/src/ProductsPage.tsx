@@ -98,6 +98,18 @@ export default function ProductsPage({
     <div className="layout">
       <header className="topbar">
         <div className="title">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onHome}
+            aria-label="Home"
+            title="Home"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 11l9-8 9 8" />
+              <path d="M5 10v10h5v-6h4v6h5V10" />
+            </svg>
+          </button>
           <h1>Products</h1>
         </div>
         <nav className="page-nav">
@@ -113,18 +125,6 @@ export default function ProductsPage({
           </button>
         </nav>
         <div className="user">
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={onHome}
-            aria-label="Home"
-            title="Home"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M3 11l9-8 9 8" />
-              <path d="M5 10v10h5v-6h4v6h5V10" />
-            </svg>
-          </button>
           <span>
             {session.username} <small>({session.role})</small>
           </span>
