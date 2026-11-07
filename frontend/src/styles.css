@@ -395,6 +395,19 @@ button.nav-link.active {
   cursor: default;
 }
 
+/* Products page header spans the full width (items at both ends);
+   the table card below stays centered at its normal width */
+.page-products .layout {
+  max-width: none;
+  padding: 0.9rem clamp(1rem, 5vw, 4.5rem);
+}
+
+.page-products .layout > main.card {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 /* Products page header: Home / Products links in the center */
 .page-products .topbar {
   display: grid;
