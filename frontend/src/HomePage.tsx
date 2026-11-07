@@ -24,6 +24,22 @@ export default function HomePage({
             Product<sup>API</sup>
           </span>
         </div>
+        <nav>
+          <button
+            type="button"
+            className="home-login"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            Home
+          </button>
+          <button
+            type="button"
+            className="home-login"
+            onClick={signedIn ? onOpenProducts : onLogin}
+          >
+            Products
+          </button>
+        </nav>
         <div className="home-nav-right">
           {signedIn ? (
             <>
