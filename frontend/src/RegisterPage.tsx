@@ -48,7 +48,7 @@ export default function RegisterPage({
   }
 
   return (
-    <main className="center">
+    <main className="center page-login">
       <form className="card login" onSubmit={handleSubmit}>
         <h1>Create account</h1>
         <label>
