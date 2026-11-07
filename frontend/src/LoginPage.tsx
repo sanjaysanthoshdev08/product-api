@@ -67,7 +67,7 @@ export default function LoginPage({
             {error}
           </p>
         )}
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="btn-black" disabled={submitting}>
           {submitting ? "Signing in…" : "Sign in"}
         </button>
         <p className="switch">

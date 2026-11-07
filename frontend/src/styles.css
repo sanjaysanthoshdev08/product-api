@@ -370,6 +370,30 @@ button.home-pill {
   }
 }
 
+/* Black pill button (same look as the Home page buttons) */
+button.btn-black {
+  padding: 0.65rem 1.1rem;
+  border: 1px solid #0b0b0b;
+  border-radius: 999px;
+  background: #0b0b0b;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+button.btn-black:hover:not(:disabled) {
+  background: #262626;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+button.btn-black:focus-visible {
+  outline-color: #0b0b0b;
+}
+
 /* Center nav links: underline on hover, and kept on the open page */
 button.nav-link {
   padding: 0 0 2px;
