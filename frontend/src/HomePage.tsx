@@ -78,12 +78,6 @@ export default function HomePage({
         </button>
       </main>
 
-      <img
-        className="home-hands"
-        src="/home-hands.jpg"
-        alt="A robotic hand reaching toward a human hand"
-      />
-
       <footer className="home-trusted">
         <p>Built with</p>
         <ul>

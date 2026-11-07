@@ -321,9 +321,11 @@ button.home-pill {
 }
 
 .home-hero {
+  flex: 1;
   text-align: center;
-  padding: clamp(2rem, 12vh, 7rem) 1rem 0;
+  padding: 2rem 1rem;
   display: grid;
+  align-content: center;
   justify-items: center;
   gap: 1rem;
 }
@@ -342,16 +344,6 @@ button.home-pill {
   color: #3d3d3d;
   font-size: 0.9rem;
   line-height: 1.45;
-}
-
-.home-hands {
-  display: block;
-  width: 100%;
-  margin-top: auto;
-  /* blends the photo's pale background into the page texture */
-  mix-blend-mode: multiply;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
 }
 
 .home-trusted {
