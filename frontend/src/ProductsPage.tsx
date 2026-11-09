@@ -13,6 +13,7 @@ interface Props {
   onEditProduct: (id: number) => void; // ADMIN only
   onLogout: () => void;
   onHome: () => void;
+  onAllProducts: () => void;
 }
 
 export default function ProductsPage({
@@ -24,6 +25,7 @@ export default function ProductsPage({
   onEditProduct,
   onLogout,
   onHome,
+  onAllProducts,
 }: Props) {
   const isAdmin = session.role === "ADMIN";
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -122,6 +124,9 @@ export default function ProductsPage({
             aria-current="page"
           >
             Products
+          </button>
+          <button type="button" className="nav-link" onClick={onAllProducts}>
+            All Products
           </button>
         </nav>
         <div className="user">

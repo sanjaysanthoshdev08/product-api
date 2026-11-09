@@ -5,6 +5,7 @@ interface Props {
   // products screen instead of Sign in / Register.
   username?: string;
   onOpenProducts?: () => void;
+  onOpenAllProducts?: () => void;
   onLogout?: () => void;
 }
 
@@ -13,6 +14,7 @@ export default function HomePage({
   onTryNow,
   username,
   onOpenProducts,
+  onOpenAllProducts,
   onLogout,
 }: Props) {
   const signedIn = username !== undefined;
@@ -39,6 +41,13 @@ export default function HomePage({
             onClick={signedIn ? onOpenProducts : onLogin}
           >
             Products
+          </button>
+          <button
+            type="button"
+            className="nav-link"
+            onClick={signedIn ? onOpenAllProducts : onLogin}
+          >
+            All Products
           </button>
         </nav>
         <div className="home-nav-right">

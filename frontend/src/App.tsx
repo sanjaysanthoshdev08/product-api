@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { AuthResponse } from "./api";
+import AllProductsPage from "./AllProductsPage";
 import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
 import ForgotPasswordPage from "./ForgotPasswordPage";
@@ -35,6 +36,8 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [listPage, setListPage] = useState(0);
   const [adding, setAdding] = useState(false);
+  // Which product listing is open: the admin table or the All Products grid.
+  const [showAll, setShowAll] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   // After signing in (or reloading while signed in) the user lands on Home.
   const [atHome, setAtHome] = useState(true);
@@ -60,6 +63,7 @@ export default function App() {
     setListPage(0);
     setAdding(false);
     setEditingId(null);
+    setShowAll(false);
     setAtHome(true);
     setView("home");
   }
@@ -87,7 +91,14 @@ export default function App() {
           onLogin={() => {}}
           onTryNow={() => {}}
           username={session.username}
-          onOpenProducts={() => setAtHome(false)}
+          onOpenProducts={() => {
+            setShowAll(false);
+            setAtHome(false);
+          }}
+          onOpenAllProducts={() => {
+            setShowAll(true);
+            setAtHome(false);
+          }}
           onLogout={handleLogout}
         />
       );
@@ -121,6 +132,17 @@ export default function App() {
         />
       );
     }
+    if (showAll) {
+      return (
+        <AllProductsPage
+          session={session}
+          onSelectProduct={setSelectedId}
+          onLogout={handleLogout}
+          onHome={() => setAtHome(true)}
+          onProducts={() => setShowAll(false)}
+        />
+      );
+    }
     return (
       <ProductsPage
         session={session}
@@ -131,6 +153,7 @@ export default function App() {
         onEditProduct={setEditingId}
         onLogout={handleLogout}
         onHome={() => setAtHome(true)}
+        onAllProducts={() => setShowAll(true)}
       />
     );
   }

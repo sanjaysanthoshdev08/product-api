@@ -494,7 +494,7 @@ button.icon-btn {
   font-family: "Inter Tight", "Inter", system-ui, "Segoe UI", sans-serif;
 }
 
-.page-products button:not(.link):not(.secondary):not(.danger):not(.icon-btn):not(.nav-link) {
+.page-products button:not(.link):not(.secondary):not(.danger):not(.icon-btn):not(.nav-link):not(.product-card) {
   border-radius: 999px;
   border-color: #0b0b0b;
   background: #0b0b0b;
@@ -556,4 +556,88 @@ button.icon-btn {
 .success {
   color: #15803d;
   margin: 0;
+}
+
+.all-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.all-toolbar input[type="search"] {
+  flex: 1 1 220px;
+  max-width: 360px;
+}
+
+.all-count {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.product-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.page-products button.product-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  text-align: left;
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.page-products button.product-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.product-card-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.product-card-desc {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card-foot {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock {
+  font-size: 0.8rem;
+}
+
+.stock.in {
+  color: #15803d;
+}
+
+.stock.out {
+  color: var(--danger);
 }
