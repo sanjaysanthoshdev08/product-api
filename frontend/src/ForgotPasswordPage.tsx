@@ -5,9 +5,14 @@ import { forgotPassword } from "./api";
 interface Props {
   onShowLogin: () => void;
   onShowHome: () => void;
+  onResetToken: (token: string) => void;
 }
 
-export default function ForgotPasswordPage({ onShowLogin, onShowHome }: Props) {
+export default function ForgotPasswordPage({
+  onShowLogin,
+  onShowHome,
+  onResetToken,
+}: Props) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -19,7 +24,13 @@ export default function ForgotPasswordPage({ onShowLogin, onShowHome }: Props) {
     setMessage(null);
     setSubmitting(true);
     try {
-      setMessage(await forgotPassword(email.trim()));
+      const result = await forgotPassword(email.trim());
+      if (result.resetToken) {
+        // Local development (no SMTP): go straight to the reset page
+        onResetToken(result.resetToken);
+        return;
+      }
+      setMessage(result.message);
     } catch (err) {
       setError(
         err instanceof TypeError

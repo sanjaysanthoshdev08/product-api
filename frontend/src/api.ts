@@ -77,9 +77,12 @@ export async function register(
   return res.json();
 }
 
-// POST /api/v1/auth/forgot-password -> 202 { message }. The response is the
-// same whether or not the account exists.
-export async function forgotPassword(email: string): Promise<string> {
+// POST /api/v1/auth/forgot-password -> 202 { message, resetToken? }.
+// resetToken is only present in local development (no SMTP configured) when
+// the account exists; with email set up the link is only ever emailed.
+export async function forgotPassword(
+  email: string,
+): Promise<{ message: string; resetToken?: string }> {
   const res = await fetch("/api/v1/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -87,7 +90,11 @@ export async function forgotPassword(email: string): Promise<string> {
   });
   if (!res.ok) throw new ApiError(res.status, await readError(res));
   const body = await res.json();
-  return typeof body.message === "string" ? body.message : "";
+  return {
+    message: typeof body.message === "string" ? body.message : "",
+    resetToken:
+      typeof body.resetToken === "string" ? body.resetToken : undefined,
+  };
 }
 
 // POST /api/v1/auth/reset-password { token, newPassword } -> 200 { message }.

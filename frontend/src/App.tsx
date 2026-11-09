@@ -31,7 +31,7 @@ export default function App() {
   const [view, setView] = useState<"home" | "login" | "register" | "forgot" | "reset">(
     () => (readResetToken() ? "reset" : "home"),
   );
-  const [resetToken] = useState<string | null>(readResetToken);
+  const [resetToken, setResetToken] = useState<string | null>(readResetToken);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [listPage, setListPage] = useState(0);
   const [adding, setAdding] = useState(false);
@@ -149,6 +149,10 @@ export default function App() {
       <ForgotPasswordPage
         onShowLogin={() => setView("login")}
         onShowHome={() => setView("home")}
+        onResetToken={(token) => {
+          setResetToken(token);
+          setView("reset");
+        }}
       />
     );
   }
