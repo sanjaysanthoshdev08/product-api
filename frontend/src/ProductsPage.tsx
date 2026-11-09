@@ -100,7 +100,7 @@ export default function ProductsPage({
     <div className="page-products">
     <div className="layout">
       <header className="topbar">
-        <div className="title">
+        <NavMenu brandClassName="title" brand={<>
           <button
             type="button"
             className="icon-btn"
@@ -114,8 +114,7 @@ export default function ProductsPage({
             </svg>
           </button>
           <h1>Products</h1>
-        </div>
-        <NavMenu navClassName="page-nav" extraClassName="user" extra={<>
+        </>} navClassName="page-nav" extraClassName="user" extra={<>
           <span>
             {session.username} <small>({session.role})</small>
           </span>

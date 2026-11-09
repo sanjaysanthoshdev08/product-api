@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 interface Props {
+  brand?: ReactNode; // left-hand logo / page title
+  brandClassName?: string; // class for the wrappers around `brand`
   children: ReactNode; // the nav links
   navClassName?: string; // class for the <nav> (e.g. "page-nav")
   extra?: ReactNode; // account actions (user name, log out, ...)
@@ -10,9 +12,11 @@ interface Props {
 
 // Wide screens: the links and the account actions sit inline in the header
 // (the wrappers use `display: contents`, see styles.css).
-// Small screens: both move into a panel that drops down from a three-line
-// circle button at the top right.
+// Small screens: the brand/title and both groups move into a panel that
+// slides down from a three-line circle button at the top right.
 export default function NavMenu({
+  brand,
+  brandClassName,
   children,
   navClassName,
   extra,
@@ -41,7 +45,12 @@ export default function NavMenu({
   }, [open]);
 
   return (
-    <div className="nav-menu" ref={rootRef}>
+    <div className={open ? "nav-menu open" : "nav-menu"} ref={rootRef}>
+      {brand !== undefined && (
+        <div className={["nav-brand-bar", brandClassName].filter(Boolean).join(" ")}>
+          {brand}
+        </div>
+      )}
       <button
         type="button"
         className="icon-btn menu-btn"
@@ -60,6 +69,11 @@ export default function NavMenu({
         // choosing anything in the menu closes it
         onClick={() => setOpen(false)}
       >
+        {brand !== undefined && (
+          <div className={["nav-brand-panel", brandClassName].filter(Boolean).join(" ")}>
+            {brand}
+          </div>
+        )}
         <nav className={navClassName}>{children}</nav>
         {extra !== undefined && (
           <div className={["nav-extra", extraClassName].filter(Boolean).join(" ")}>

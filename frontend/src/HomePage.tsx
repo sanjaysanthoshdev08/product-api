@@ -23,12 +23,11 @@ export default function HomePage({
   return (
     <div className="home">
       <header className="home-nav">
-        <div className="home-nav-left">
+        <NavMenu brandClassName="home-nav-left" brand={<>
           <span className="home-brand">
             Product<sup>API</sup>
           </span>
-        </div>
-        <NavMenu extraClassName="home-nav-right" extra={<>
+        </>} extraClassName="home-nav-right" extra={<>
           {signedIn ? (
             <>
               <span className="home-login">Hi, {username}</span>
