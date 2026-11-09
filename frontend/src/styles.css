@@ -365,8 +365,18 @@ button.home-pill {
     justify-content: space-between;
   }
 
+  /* Keep the nav links visible on small screens: wrap them to their own row */
+  .home-nav {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
   .home-nav nav {
-    display: none;
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
   }
 }
 
@@ -455,7 +465,11 @@ button.nav-link.active {
   }
 
   .page-nav {
-    display: none;
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
   }
 }
 
