@@ -1,3 +1,5 @@
+import NavMenu from "./NavMenu";
+
 interface Props {
   onLogin: () => void;
   onTryNow: () => void;
@@ -26,7 +28,7 @@ export default function HomePage({
             Product<sup>API</sup>
           </span>
         </div>
-        <nav>
+        <NavMenu>
           <button
             type="button"
             className="nav-link active"
@@ -49,7 +51,7 @@ export default function HomePage({
           >
             All Products
           </button>
-        </nav>
+        </NavMenu>
         <div className="home-nav-right">
           {signedIn ? (
             <>

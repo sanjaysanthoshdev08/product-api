@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ApiError, fetchProducts } from "./api";
+import NavMenu from "./NavMenu";
 import type { AuthResponse, Product } from "./api";
 
 const FETCH_SIZE = 100;
@@ -93,7 +94,7 @@ export default function AllProductsPage({
             </button>
             <h1>All Products</h1>
           </div>
-          <nav className="page-nav">
+          <NavMenu className="page-nav">
             <button type="button" className="nav-link" onClick={onHome}>
               Home
             </button>
@@ -107,7 +108,7 @@ export default function AllProductsPage({
             >
               All Products
             </button>
-          </nav>
+          </NavMenu>
           <div className="user">
             <span>
               {session.username} <small>({session.role})</small>

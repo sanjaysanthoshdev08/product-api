@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ApiError, deleteProduct, fetchProducts } from "./api";
+import NavMenu from "./NavMenu";
 import type { AuthResponse, ProductPage } from "./api";
 
 const PAGE_SIZE = 10;
@@ -114,7 +115,7 @@ export default function ProductsPage({
           </button>
           <h1>Products</h1>
         </div>
-        <nav className="page-nav">
+        <NavMenu className="page-nav">
           <button type="button" className="nav-link" onClick={onHome}>
             Home
           </button>
@@ -128,7 +129,7 @@ export default function ProductsPage({
           <button type="button" className="nav-link" onClick={onAllProducts}>
             All Products
           </button>
-        </nav>
+        </NavMenu>
         <div className="user">
           <span>
             {session.username} <small>({session.role})</small>

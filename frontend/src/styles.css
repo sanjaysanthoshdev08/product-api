@@ -360,19 +360,6 @@ button.home-pill {
     justify-content: space-between;
   }
 
-  /* Keep the nav links visible on small screens: wrap them to their own row */
-  .home-nav {
-    flex-wrap: wrap;
-    row-gap: 0.5rem;
-  }
-
-  .home-nav nav {
-    order: 3;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-  }
 }
 
 /* Black pill button (same look as the Home page buttons) */
@@ -459,13 +446,6 @@ button.nav-link.active {
     flex-wrap: wrap;
   }
 
-  .page-nav {
-    order: 3;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-  }
 }
 
 /* Home icon button in the Products page header */
@@ -854,11 +834,84 @@ img {
     gap: 0.85rem;
   }
 
-  .home-nav nav {
-    gap: 0.25rem;
-  }
-
   button.nav-link {
     font-size: 0.85rem;
+  }
+}
+
+/* =====================================================================
+   Hamburger menu: nav links inline on wide screens, inside a three-line
+   circle button on small screens
+   ===================================================================== */
+button.menu-btn {
+  display: none;
+}
+
+button.menu-btn {
+  color: #0b0b0b;
+  border-color: #0b0b0b;
+  background: #fff;
+}
+
+@media (max-width: 700px) {
+  .home-nav,
+  .page-products .topbar {
+    position: relative;
+  }
+
+  .nav-menu {
+    order: 3;
+  }
+
+  button.menu-btn {
+    display: inline-grid;
+    flex: none;
+  }
+
+  .home-nav .home-nav-right {
+    margin-left: auto;
+    margin-right: 0.75rem;
+  }
+
+  .page-products .topbar .user {
+    margin-left: auto;
+    margin-right: 0.75rem;
+  }
+
+  /* the dropdown panel */
+  .nav-menu nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: clamp(1rem, 5vw, 4.5rem);
+    left: auto;
+    z-index: 30;
+    min-width: 12rem;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.4rem;
+    background: #fff;
+    border: 1px solid #0b0b0b;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  .nav-menu nav.open {
+    display: flex;
+  }
+
+  .nav-menu nav button.nav-link {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    font-size: 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+
+  .nav-menu nav button.nav-link:hover,
+  .nav-menu nav button.nav-link.active {
+    background: #0b0b0b;
+    color: #fff;
   }
 }
