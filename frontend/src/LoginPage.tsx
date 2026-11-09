@@ -6,12 +6,14 @@ import type { AuthResponse } from "./api";
 interface Props {
   onLogin: (auth: AuthResponse) => void;
   onShowRegister: () => void;
+  onShowForgot: () => void;
   onShowHome: () => void;
 }
 
 export default function LoginPage({
   onLogin,
   onShowRegister,
+  onShowForgot,
   onShowHome,
 }: Props) {
   const [username, setUsername] = useState("");
@@ -62,6 +64,11 @@ export default function LoginPage({
             required
           />
         </label>
+        <p className="forgot">
+          <button type="button" className="link" onClick={onShowForgot}>
+            Forgot password?
+          </button>
+        </p>
         {error && (
           <p className="error" role="alert">
             {error}

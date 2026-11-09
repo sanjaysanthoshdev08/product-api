@@ -540,3 +540,20 @@ button.icon-btn {
   color: var(--danger);
   border-color: var(--danger);
 }
+
+.forgot {
+  margin: -0.25rem 0 0;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.success {
+  color: #15803d;
+  margin: 0;
+}

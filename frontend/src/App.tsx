@@ -2,11 +2,18 @@ import { useState } from "react";
 import type { AuthResponse } from "./api";
 import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
+import ForgotPasswordPage from "./ForgotPasswordPage";
 import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
 import ProductDetailsPage from "./ProductDetailsPage";
 import ProductsPage from "./ProductsPage";
 import RegisterPage from "./RegisterPage";
+import ResetPasswordPage from "./ResetPasswordPage";
+
+// The emailed link opens the site as /?reset-token=...
+function readResetToken(): string | null {
+  return new URLSearchParams(window.location.search).get("reset-token");
+}
 
 const STORAGE_KEY = "product-api-session";
 
@@ -21,7 +28,10 @@ function loadSession(): AuthResponse | null {
 
 export default function App() {
   const [session, setSession] = useState<AuthResponse | null>(loadSession);
-  const [view, setView] = useState<"home" | "login" | "register">("home");
+  const [view, setView] = useState<"home" | "login" | "register" | "forgot" | "reset">(
+    () => (readResetToken() ? "reset" : "home"),
+  );
+  const [resetToken] = useState<string | null>(readResetToken);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [listPage, setListPage] = useState(0);
   const [adding, setAdding] = useState(false);
@@ -52,6 +62,22 @@ export default function App() {
     setEditingId(null);
     setAtHome(true);
     setView("home");
+  }
+
+  function leaveReset(next: "login" | "forgot") {
+    // Drop the token from the address bar so it is not kept in history
+    window.history.replaceState(null, "", window.location.pathname);
+    setView(next);
+  }
+
+  if (view === "reset" && resetToken) {
+    return (
+      <ResetPasswordPage
+        token={resetToken}
+        onShowLogin={() => leaveReset("login")}
+        onRequestNew={() => leaveReset("forgot")}
+      />
+    );
   }
 
   if (session) {
@@ -118,16 +144,27 @@ export default function App() {
     );
   }
 
+  if (view === "forgot") {
+    return (
+      <ForgotPasswordPage
+        onShowLogin={() => setView("login")}
+        onShowHome={() => setView("home")}
+      />
+    );
+  }
+
   return view === "register" ? (
     <RegisterPage
       onRegistered={handleLogin}
       onShowLogin={() => setView("login")}
+      onShowForgot={() => setView("forgot")}
       onShowHome={() => setView("home")}
     />
   ) : (
     <LoginPage
       onLogin={handleLogin}
       onShowRegister={() => setView("register")}
+      onShowForgot={() => setView("forgot")}
       onShowHome={() => setView("home")}
     />
   );

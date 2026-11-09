@@ -65,15 +65,45 @@ export async function login(
 // New accounts always get the USER role; 409 means the username is taken.
 export async function register(
   username: string,
+  email: string,
   password: string,
 ): Promise<AuthResponse> {
   const res = await fetch("/api/v1/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, email, password }),
   });
   if (!res.ok) throw new ApiError(res.status, await readError(res));
   return res.json();
+}
+
+// POST /api/v1/auth/forgot-password -> 202 { message }. The response is the
+// same whether or not the account exists.
+export async function forgotPassword(email: string): Promise<string> {
+  const res = await fetch("/api/v1/auth/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  const body = await res.json();
+  return typeof body.message === "string" ? body.message : "";
+}
+
+// POST /api/v1/auth/reset-password { token, newPassword } -> 200 { message }.
+// 400 means the link is invalid, used or expired.
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<string> {
+  const res = await fetch("/api/v1/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  const body = await res.json();
+  return typeof body.message === "string" ? body.message : "";
 }
 
 // GET /api/v1/products/{id} -> ProductResponse, or 404 with a message.

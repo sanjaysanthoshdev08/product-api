@@ -6,15 +6,18 @@ import type { AuthResponse } from "./api";
 interface Props {
   onRegistered: (auth: AuthResponse) => void;
   onShowLogin: () => void;
+  onShowForgot: () => void;
   onShowHome: () => void;
 }
 
 export default function RegisterPage({
   onRegistered,
   onShowLogin,
+  onShowForgot,
   onShowHome,
 }: Props) {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +36,7 @@ export default function RegisterPage({
     try {
       // The backend returns a token on success, so the user is signed in
       // straight away.
-      onRegistered(await register(username.trim(), password));
+      onRegistered(await register(username.trim(), email.trim(), password));
     } catch (err) {
       setError(
         err instanceof TypeError
@@ -62,6 +65,16 @@ export default function RegisterPage({
           />
         </label>
         <label>
+          Email
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+        </label>
+        <label>
           Password
           <input
             type="password"
@@ -81,6 +94,11 @@ export default function RegisterPage({
             required
           />
         </label>
+        <p className="forgot">
+          <button type="button" className="link" onClick={onShowForgot}>
+            Forgot password?
+          </button>
+        </p>
         {error && (
           <p className="error" role="alert">
             {error}

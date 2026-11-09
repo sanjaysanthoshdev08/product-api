@@ -39,7 +39,13 @@ public class AuthService {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
 
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new UsernameAlreadyExistsException("Email already registered");
+        }
+
         User user = new User();
+        user.setEmail(email);
 
         user.setUsername(request.getUsername());
 
