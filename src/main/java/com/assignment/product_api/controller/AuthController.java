@@ -56,12 +56,15 @@ public class AuthController {
     public Map<String, String> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
 
-        passwordResetService.requestReset(request.getEmail());
+        String devToken = passwordResetService.requestReset(request.getEmail());
 
-        return Map.of(
-                "message",
-                "If an account exists for that email, we have sent password reset instructions."
-        );
+        String message =
+                "If an account exists for that email, we have sent password reset instructions.";
+
+        // Only present when SMTP is not configured (local development)
+        return devToken == null
+                ? Map.of("message", message)
+                : Map.of("message", message, "resetToken", devToken);
     }
 
     // RESET PASSWORD (token comes from the emailed link)

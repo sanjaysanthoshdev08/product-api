@@ -60,10 +60,13 @@ public class PasswordResetService {
     // Silently does nothing for unknown emails so callers cannot tell
     // whether an account exists.
     @Transactional
-    public void requestReset(String email) {
+    // Returns the raw token ONLY when no SMTP server is configured (local
+    // development), so the UI can go straight to the reset page. With SMTP
+    // configured it always returns null and the token travels by email only.
+    public String requestReset(String email) {
         User user = userRepository.findByEmailIgnoreCase(email.trim()).orElse(null);
         if (user == null) {
-            return;
+            return null;
         }
 
         // One live token per user
@@ -79,7 +82,8 @@ public class PasswordResetService {
                 Instant.now().plus(expiryMinutes, ChronoUnit.MINUTES)));
 
         String link = frontendUrl + "/?reset-token=" + token;
-        sendEmail(user.getEmail(), link);
+        boolean emailed = sendEmail(user.getEmail(), link);
+        return emailed ? null : (mailSender.getIfAvailable() == null ? token : null);
     }
 
     @Transactional
@@ -102,12 +106,12 @@ public class PasswordResetService {
         tokenRepository.deleteByUser_Id(user.getId());
     }
 
-    private void sendEmail(String to, String link) {
+    private boolean sendEmail(String to, String link) {
         JavaMailSender sender = mailSender.getIfAvailable();
         if (sender == null) {
             // No SMTP configured (local development): print the link instead.
             log.warn("SMTP not configured. Password reset link for {}: {}", to, link);
-            return;
+            return false;
         }
         try {
             SimpleMailMessage message = new SimpleMailMessage();
@@ -119,9 +123,11 @@ public class PasswordResetService {
                     + expiryMinutes + " minutes):\n" + link + "\n\n"
                     + "If you did not ask for this, you can ignore this email.");
             sender.send(message);
+            return true;
         } catch (Exception e) {
             // Never reveal delivery problems to the caller
             log.error("Failed to send password reset email", e);
+            return false;
         }
     }
 
