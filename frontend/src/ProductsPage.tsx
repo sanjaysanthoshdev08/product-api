@@ -172,7 +172,7 @@ export default function ProductsPage({
               <tbody>
                 {products.map((p) => (
                   <tr key={p.id}>
-                    <td>
+                    <td data-label="Name">
                       <button
                         type="button"
                         className="link"
@@ -181,11 +181,15 @@ export default function ProductsPage({
                         {p.name}
                       </button>
                     </td>
-                    <td>{p.description ?? "—"}</td>
-                    <td className="num">{Number(p.price).toFixed(2)}</td>
-                    <td className="num">{p.quantity}</td>
+                    <td data-label="Description">{p.description ?? "—"}</td>
+                    <td className="num" data-label="Price">
+                      {Number(p.price).toFixed(2)}
+                    </td>
+                    <td className="num" data-label="Quantity">
+                      {p.quantity}
+                    </td>
                     {isAdmin && (
-                      <td className="num">
+                      <td className="num cell-actions">
                         <button
                           className="secondary small"
                           onClick={() => onEditProduct(p.id)}

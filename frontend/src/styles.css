@@ -36,6 +36,7 @@ h1 {
 
 .center {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 16px;
@@ -245,12 +246,6 @@ td button.link {
   font-size: 0.9rem;
 }
 
-@media (max-width: 600px) {
-  th:nth-child(2),
-  td:nth-child(2) {
-    display: none;
-  }
-}
 
 /* ---------- Page 7: Home (black & white landing page) ---------- */
 .home {
@@ -654,4 +649,216 @@ button.icon-btn {
 
 .stock.out {
   color: var(--danger);
+}
+
+/* =====================================================================
+   Responsive layout
+   Breakpoints: tablet <= 900px, phone <= 600px, small phone <= 400px
+   ===================================================================== */
+
+/* Never let content push the page sideways */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Let grid children shrink instead of stretching the page */
+.layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.user {
+  flex-wrap: wrap;
+}
+
+.actions {
+  flex-wrap: wrap;
+}
+
+.product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+}
+
+/* Touch devices: comfortable tap targets, and no iOS zoom on focus */
+@media (pointer: coarse) {
+  button,
+  input,
+  textarea {
+    min-height: 44px;
+  }
+
+  button.link,
+  button.nav-link {
+    min-height: 0;
+    padding-block: 0.4rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-nav-left,
+  .home-nav-right {
+    gap: 1rem;
+  }
+
+  .details {
+    gap: 0.5rem 1rem;
+  }
+}
+
+@media (max-width: 700px) {
+  input,
+  textarea {
+    font-size: 16px;
+  }
+
+  .page-products .topbar .user {
+    justify-self: auto;
+  }
+
+  .page-products .topbar {
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .home-nav-right {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .layout {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .form {
+    max-width: none;
+  }
+
+  .form .actions button {
+    flex: 1 1 auto;
+  }
+
+  /* Product table -> stacked cards */
+  .page-products table,
+  .page-products tbody,
+  .page-products tr,
+  .page-products td {
+    display: block;
+    width: 100%;
+  }
+
+  .page-products thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .page-products tr {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-products td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border: none;
+    text-align: right;
+  }
+
+  .page-products td::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-align: left;
+    padding-top: 0.15rem;
+  }
+
+  .page-products td.cell-actions {
+    justify-content: flex-end;
+  }
+
+  .page-products td.cell-actions::before {
+    content: none;
+  }
+
+  .page-products td[data-label="Name"] button.link {
+    text-align: right;
+  }
+
+  .pager {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pager span {
+    order: -1;
+    width: 100%;
+  }
+
+  .all-toolbar input[type="search"] {
+    max-width: none;
+  }
+
+  .home-hero {
+    padding-top: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .details {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+
+  .details dd {
+    margin-bottom: 0.6rem;
+  }
+
+  /* Home header: drop the greeting to keep brand + buttons on one row */
+  .home-login:not(button) {
+    display: none;
+  }
+
+  .home-nav {
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  .home-hero h1 {
+    font-size: 2rem;
+  }
+
+  .login {
+    gap: 0.85rem;
+  }
+
+  .home-nav nav {
+    gap: 0.25rem;
+  }
+
+  button.nav-link {
+    font-size: 0.85rem;
+  }
 }
