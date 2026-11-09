@@ -94,7 +94,14 @@ export default function AllProductsPage({
             </button>
             <h1>All Products</h1>
           </div>
-          <NavMenu className="page-nav">
+          <NavMenu navClassName="page-nav" extraClassName="user" extra={<>
+            <span>
+              {session.username} <small>({session.role})</small>
+            </span>
+            <button className="secondary" onClick={onLogout}>
+              Log out
+            </button>
+          </>}>
             <button type="button" className="nav-link" onClick={onHome}>
               Home
             </button>
@@ -109,14 +116,6 @@ export default function AllProductsPage({
               All Products
             </button>
           </NavMenu>
-          <div className="user">
-            <span>
-              {session.username} <small>({session.role})</small>
-            </span>
-            <button className="secondary" onClick={onLogout}>
-              Log out
-            </button>
-          </div>
         </header>
 
         <main className="card">

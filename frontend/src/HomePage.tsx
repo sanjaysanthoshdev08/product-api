@@ -28,7 +28,28 @@ export default function HomePage({
             Product<sup>API</sup>
           </span>
         </div>
-        <NavMenu>
+        <NavMenu extraClassName="home-nav-right" extra={<>
+          {signedIn ? (
+            <>
+              <span className="home-login">Hi, {username}</span>
+              <button type="button" className="home-login" onClick={onLogout}>
+                Logout
+              </button>
+              <button type="button" className="home-pill" onClick={onOpenProducts}>
+                Products
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="home-login" onClick={onLogin}>
+                Login
+              </button>
+              <button type="button" className="home-pill" onClick={onTryNow}>
+                Sign Up
+              </button>
+            </>
+          )}
+        </>}>
           <button
             type="button"
             className="nav-link active"
@@ -52,28 +73,6 @@ export default function HomePage({
             All Products
           </button>
         </NavMenu>
-        <div className="home-nav-right">
-          {signedIn ? (
-            <>
-              <span className="home-login">Hi, {username}</span>
-              <button type="button" className="home-login" onClick={onLogout}>
-                Logout
-              </button>
-              <button type="button" className="home-pill" onClick={onOpenProducts}>
-                Products
-              </button>
-            </>
-          ) : (
-            <>
-              <button type="button" className="home-login" onClick={onLogin}>
-                Login
-              </button>
-              <button type="button" className="home-pill" onClick={onTryNow}>
-                Sign Up
-              </button>
-            </>
-          )}
-        </div>
       </header>
 
       <main className="home-hero">

@@ -3,15 +3,24 @@ import type { ReactNode } from "react";
 
 interface Props {
   children: ReactNode; // the nav links
-  className?: string; // class for the <nav> (e.g. "page-nav")
+  navClassName?: string; // class for the <nav> (e.g. "page-nav")
+  extra?: ReactNode; // account actions (user name, log out, ...)
+  extraClassName?: string; // class for the wrapper around `extra`
 }
 
-// Nav links shown inline on wide screens. On small screens (see styles.css)
-// they are hidden and open from a three-line (hamburger) circle button.
-export default function NavMenu({ children, className }: Props) {
+// Wide screens: the links and the account actions sit inline in the header
+// (the wrappers use `display: contents`, see styles.css).
+// Small screens: both move into a panel that drops down from a three-line
+// circle button at the top right.
+export default function NavMenu({
+  children,
+  navClassName,
+  extra,
+  extraClassName,
+}: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const navId = useId();
+  const panelId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -38,21 +47,26 @@ export default function NavMenu({ children, className }: Props) {
         className="icon-btn menu-btn"
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
-        aria-controls={navId}
+        aria-controls={panelId}
         onClick={() => setOpen((o) => !o)}
       >
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>
-      <nav
-        id={navId}
-        className={[className, open ? "open" : ""].filter(Boolean).join(" ")}
-        // choosing a link closes the menu
+      <div
+        id={panelId}
+        className={open ? "nav-panel open" : "nav-panel"}
+        // choosing anything in the menu closes it
         onClick={() => setOpen(false)}
       >
-        {children}
-      </nav>
+        <nav className={navClassName}>{children}</nav>
+        {extra !== undefined && (
+          <div className={["nav-extra", extraClassName].filter(Boolean).join(" ")}>
+            {extra}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -811,11 +811,6 @@ img {
     margin-bottom: 0.6rem;
   }
 
-  /* Home header: drop the greeting to keep brand + buttons on one row */
-  .home-login:not(button) {
-    display: none;
-  }
-
   .home-nav {
     padding-inline: 1rem;
   }
@@ -840,14 +835,20 @@ img {
 }
 
 /* =====================================================================
-   Hamburger menu: nav links inline on wide screens, inside a three-line
-   circle button on small screens
+   Mobile menu
+   Wide screens: links and account actions sit inline in the header (the
+   wrappers use display: contents so they stay grid/flex items of it).
+   700px and below: everything moves into a full-width panel that drops
+   down from a three-line circle button at the top right. Row 1 holds the
+   page links, row 2 the account actions, all centered.
    ===================================================================== */
-button.menu-btn {
-  display: none;
+.nav-menu,
+.nav-panel {
+  display: contents;
 }
 
 button.menu-btn {
+  display: none;
   color: #0b0b0b;
   border-color: #0b0b0b;
   background: #fff;
@@ -857,61 +858,61 @@ button.menu-btn {
   .home-nav,
   .page-products .topbar {
     position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .nav-menu {
-    order: 3;
+    display: block;
+    flex: none;
+    margin-left: auto;
   }
 
   button.menu-btn {
     display: inline-grid;
-    flex: none;
   }
 
-  .home-nav .home-nav-right {
-    margin-left: auto;
-    margin-right: 0.75rem;
-  }
-
-  .page-products .topbar .user {
-    margin-left: auto;
-    margin-right: 0.75rem;
-  }
-
-  /* the dropdown panel */
-  .nav-menu nav {
+  .nav-panel {
     display: none;
     position: absolute;
-    top: calc(100% + 0.25rem);
-    right: clamp(1rem, 5vw, 4.5rem);
-    left: auto;
+    top: 100%;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
     z-index: 30;
-    min-width: 12rem;
     flex-direction: column;
-    gap: 0;
-    padding: 0.4rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
     background: #fff;
-    border: 1px solid #0b0b0b;
-    border-radius: 14px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    border-bottom: 1px solid #0b0b0b;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
   }
 
-  .nav-menu nav.open {
+  .nav-panel.open {
     display: flex;
   }
 
-  .nav-menu nav button.nav-link {
+  .nav-panel nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1.75rem;
     width: 100%;
-    padding: 0.7rem 0.9rem;
-    text-align: left;
-    font-size: 1rem;
-    border-radius: 8px;
-    text-decoration: none;
   }
 
-  .nav-menu nav button.nav-link:hover,
-  .nav-menu nav button.nav-link.active {
-    background: #0b0b0b;
-    color: #fff;
+  .nav-panel .nav-extra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    width: 100%;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid #dcdcdc;
+    justify-self: auto;
   }
 }
