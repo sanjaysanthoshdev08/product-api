@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ApiError, deleteProduct, fetchProducts } from "./api";
 import NavMenu from "./NavMenu";
 import type { AuthResponse, ProductPage } from "./api";
+import { categoryLabel } from "./fashion";
 
 const PAGE_SIZE = 10;
 
@@ -162,6 +163,7 @@ export default function ProductsPage({
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Category</th>
                   <th>Description</th>
                   <th className="num">Price</th>
                   <th className="num">Quantity</th>
@@ -180,6 +182,7 @@ export default function ProductsPage({
                         {p.name}
                       </button>
                     </td>
+                    <td data-label="Category">{categoryLabel(p.category) || "—"}</td>
                     <td data-label="Description">{p.description ?? "—"}</td>
                     <td className="num" data-label="Price">
                       {Number(p.price).toFixed(2)}

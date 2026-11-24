@@ -94,6 +94,10 @@ export default function EditProductPage({
             description: product.description ?? "",
             price: product.price,
             quantity: product.quantity,
+            category: product.category ?? "",
+            colors: product.colors ?? "",
+            sizes: product.sizes ?? "",
+            imageKey: product.imageKey ?? "",
           }}
           submitLabel="Save changes"
           submittingLabel="Saving…"

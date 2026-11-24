@@ -1346,3 +1346,12 @@ button.shop-btn.btn-yellow:hover:not(:disabled) {
     font-size: 0.88rem;
   }
 }
+
+select {
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}

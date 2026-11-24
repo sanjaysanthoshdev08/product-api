@@ -96,6 +96,9 @@ const SHAPES: Record<string, (fill: string, line: string) => ReactElement> = {
   ),
 };
 
+// The illustration keys an admin can pick from
+export const IMAGE_KEYS = Object.keys(SHAPES);
+
 const FALLBACK = "tshirt";
 
 export default function ProductArt({ imageKey, color, className }: Props) {
