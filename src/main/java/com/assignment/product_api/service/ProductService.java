@@ -22,86 +22,71 @@ public class ProductService {
     public ProductResponse createProduct(ProductRequest request) {
 
         Product product = new Product();
+        apply(product, request);
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
-
-        Product savedProduct = productRepository.save(product);
-
-        return new ProductResponse(
-                savedProduct.getId(),
-                savedProduct.getName(),
-                savedProduct.getDescription(),
-                savedProduct.getPrice(),
-                savedProduct.getQuantity()
-        );
+        return toResponse(productRepository.save(product));
     }
 
     // GET ALL PRODUCTS WITH PAGINATION
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
 
-        Page<Product> products = productRepository.findAll(pageable);
-
-        return products.map(product -> new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getQuantity()
-        ));
+        return productRepository.findAll(pageable).map(this::toResponse);
     }
 
     // GET PRODUCT BY ID
     public ProductResponse getProductById(Long id) {
 
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(
-                        "Product not found with id: " + id
-                ));
-
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getQuantity()
-        );
+        return toResponse(findOrThrow(id));
     }
 
     // UPDATE PRODUCT
     public ProductResponse updateProduct(Long id, ProductRequest request) {
 
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException(
-                        "Product not found with id: " + id
-                ));
+        Product product = findOrThrow(id);
+        apply(product, request);
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
-
-        Product updatedProduct = productRepository.save(product);
-
-        return new ProductResponse(
-                updatedProduct.getId(),
-                updatedProduct.getName(),
-                updatedProduct.getDescription(),
-                updatedProduct.getPrice(),
-                updatedProduct.getQuantity()
-        );
+        return toResponse(productRepository.save(product));
     }
 
     // DELETE PRODUCT
     public void deleteProduct(Long id) {
 
-        Product product = productRepository.findById(id)
+        productRepository.delete(findOrThrow(id));
+    }
+
+    private Product findOrThrow(Long id) {
+        return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(
                         "Product not found with id: " + id
                 ));
+    }
 
-        productRepository.delete(product);
+    private void apply(Product product, ProductRequest request) {
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
+        product.setCategory(blankToNull(request.getCategory()));
+        product.setColors(blankToNull(request.getColors()));
+        product.setSizes(blankToNull(request.getSizes()));
+        product.setImageKey(blankToNull(request.getImageKey()));
+    }
+
+    private ProductResponse toResponse(Product product) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getQuantity(),
+                product.getCategory(),
+                product.getColors(),
+                product.getSizes(),
+                product.getImageKey()
+        );
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

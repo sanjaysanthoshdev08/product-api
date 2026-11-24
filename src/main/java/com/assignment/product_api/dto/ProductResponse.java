@@ -9,6 +9,10 @@ public class ProductResponse {
     private String description;
     private BigDecimal price;
     private Integer quantity;
+    private String category;
+    private String colors;
+    private String sizes;
+    private String imageKey;
 
     public ProductResponse() {
     }
@@ -20,6 +24,17 @@ public class ProductResponse {
         this.description = description;
         this.price = price;
         this.quantity = quantity;
+    }
+
+    public ProductResponse(Long id, String name, String description,
+                           BigDecimal price, Integer quantity,
+                           String category, String colors, String sizes,
+                           String imageKey) {
+        this(id, name, description, price, quantity);
+        this.category = category;
+        this.colors = colors;
+        this.sizes = sizes;
+        this.imageKey = imageKey;
     }
 
     public Long getId() {
@@ -60,5 +75,37 @@ public class ProductResponse {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getColors() {
+        return colors;
+    }
+
+    public void setColors(String colors) {
+        this.colors = colors;
+    }
+
+    public String getSizes() {
+        return sizes;
+    }
+
+    public void setSizes(String sizes) {
+        this.sizes = sizes;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 }

@@ -22,6 +22,17 @@ public class Product {
 
     private Integer quantity;
 
+    // Shop fields (all optional): MEN, WOMEN or KIDS
+    private String category;
+
+    // Comma-separated, e.g. "Brown,Black" and "XS,S,M,L,XL"
+    private String colors;
+
+    private String sizes;
+
+    // Which built-in illustration to show, e.g. "jacket", "jeans"
+    private String imageKey;
+
     public Product() {
     }
 
@@ -71,5 +82,37 @@ public class Product {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getColors() {
+        return colors;
+    }
+
+    public void setColors(String colors) {
+        this.colors = colors;
+    }
+
+    public String getSizes() {
+        return sizes;
+    }
+
+    public void setSizes(String sizes) {
+        this.sizes = sizes;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 }
