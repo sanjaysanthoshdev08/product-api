@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { AuthResponse } from "./api";
 import AllProductsPage from "./AllProductsPage";
 import AddProductPage from "./AddProductPage";
@@ -17,6 +17,16 @@ function readResetToken(): string | null {
 }
 
 const STORAGE_KEY = "product-api-session";
+const BAG_KEY = "product-api-bag";
+
+function loadBag(): number {
+  try {
+    const n = Number(localStorage.getItem(BAG_KEY));
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+  } catch {
+    return 0;
+  }
+}
 
 function loadSession(): AuthResponse | null {
   try {
@@ -41,6 +51,19 @@ export default function App() {
   const [adding, setAdding] = useState(false);
   // Which product listing is open: the admin table or the All Products grid.
   const [showAll, setShowAll] = useState(false);
+  const [bagCount, setBagCount] = useState(loadBag);
+
+  function handleAddToBag() {
+    setBagCount((n) => {
+      const next = n + 1;
+      try {
+        localStorage.setItem(BAG_KEY, String(next));
+      } catch {
+        // storage unavailable: the count lasts until reload
+      }
+      return next;
+    });
+  }
   const [editingId, setEditingId] = useState<number | null>(null);
   // After signing in (or reloading while signed in) the user lands on Home.
   const [atHome, setAtHome] = useState(true);
@@ -55,7 +78,9 @@ export default function App() {
     setAtHome(true);
   }
 
-  function handleLogout() {
+  // Stable identity: pages list it as an effect dependency, so a new function on
+  // every render would reload their data (and reset their selections).
+  const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
@@ -70,7 +95,7 @@ export default function App() {
     setShowAll(false);
     setAtHome(true);
     setView("home");
-  }
+  }, []);
 
   function leaveReset(next: "login" | "forgot") {
     // Drop the token from the address bar so it is not kept in history
@@ -131,6 +156,8 @@ export default function App() {
         <ProductDetailsPage
           session={session}
           productId={selectedId}
+          bagCount={bagCount}
+          onAddToBag={handleAddToBag}
           onBack={() => setSelectedId(null)}
           onLogout={handleLogout}
         />
@@ -140,6 +167,7 @@ export default function App() {
       return (
         <AllProductsPage
           session={session}
+          bagCount={bagCount}
           onSelectProduct={setSelectedId}
           onLogout={handleLogout}
           onHome={() => setAtHome(true)}

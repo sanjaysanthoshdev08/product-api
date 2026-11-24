@@ -16,6 +16,11 @@ export interface Product {
   description: string | null;
   price: number;
   quantity: number;
+  // Fashion shop fields (optional)
+  category?: string | null; // MEN | WOMEN | KIDS
+  colors?: string | null; // comma separated, e.g. "Brown,Black"
+  sizes?: string | null; // comma separated, e.g. "S,M,L"
+  imageKey?: string | null; // built-in illustration, e.g. "jacket"
 }
 
 export interface ProductPage {
@@ -138,6 +143,10 @@ export interface ProductInput {
   description: string;
   price: number;
   quantity: number;
+  category?: string;
+  colors?: string;
+  sizes?: string;
+  imageKey?: string;
 }
 
 // POST /api/v1/products (ADMIN only) -> 201 ProductResponse.
