@@ -15,6 +15,7 @@ interface Props {
   onLogout: () => void;
   onHome: () => void;
   onProducts: () => void;
+  onFitting: () => void;
 }
 
 export default function AllProductsPage({
@@ -24,6 +25,7 @@ export default function AllProductsPage({
   onLogout,
   onHome,
   onProducts,
+  onFitting,
 }: Props) {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -144,6 +146,9 @@ export default function AllProductsPage({
               aria-current="page"
             >
               All Products
+            </button>
+            <button type="button" className="nav-link" onClick={onFitting}>
+              Fitting Room
             </button>
           </NavMenu>
         </header>

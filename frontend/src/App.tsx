@@ -3,6 +3,7 @@ import type { AuthResponse } from "./api";
 import AllProductsPage from "./AllProductsPage";
 import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
+import FittingRoomPage from "./FittingRoomPage";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
@@ -52,6 +53,16 @@ export default function App() {
   // Which product listing is open: the admin table or the All Products grid.
   const [showAll, setShowAll] = useState(false);
   const [bagCount, setBagCount] = useState(loadBag);
+  // Fitting room: open flag, plus a product to put on the model when it opens
+  const [fitting, setFitting] = useState(false);
+  const [tryOnId, setTryOnId] = useState<number | null>(null);
+
+  function openFitting(productId: number | null = null) {
+    setSelectedId(null);
+    setTryOnId(productId);
+    setFitting(true);
+    setAtHome(false);
+  }
 
   function handleAddToBag() {
     setBagCount((n) => {
@@ -93,6 +104,8 @@ export default function App() {
     setAdding(false);
     setEditingId(null);
     setShowAll(false);
+    setFitting(false);
+    setTryOnId(null);
     setAtHome(true);
     setView("home");
   }, []);
@@ -122,12 +135,15 @@ export default function App() {
           username={session.username}
           onOpenProducts={() => {
             setShowAll(false);
+            setFitting(false);
             setAtHome(false);
           }}
           onOpenAllProducts={() => {
             setShowAll(true);
+            setFitting(false);
             setAtHome(false);
           }}
+          onOpenFitting={() => openFitting()}
           onLogout={handleLogout}
         />
       );
@@ -151,6 +167,29 @@ export default function App() {
         />
       );
     }
+    if (fitting) {
+      return (
+        <FittingRoomPage
+          session={session}
+          bagCount={bagCount}
+          initialProductId={tryOnId}
+          onAddToBag={handleAddToBag}
+          onHome={() => {
+            setFitting(false);
+            setAtHome(true);
+          }}
+          onProducts={() => {
+            setFitting(false);
+            setShowAll(false);
+          }}
+          onAllProducts={() => {
+            setFitting(false);
+            setShowAll(true);
+          }}
+          onLogout={handleLogout}
+        />
+      );
+    }
     if (selectedId !== null) {
       return (
         <ProductDetailsPage
@@ -158,6 +197,7 @@ export default function App() {
           productId={selectedId}
           bagCount={bagCount}
           onAddToBag={handleAddToBag}
+          onTryOn={(id) => openFitting(id)}
           onBack={() => setSelectedId(null)}
           onLogout={handleLogout}
         />
@@ -172,6 +212,7 @@ export default function App() {
           onLogout={handleLogout}
           onHome={() => setAtHome(true)}
           onProducts={() => setShowAll(false)}
+          onFitting={() => openFitting()}
         />
       );
     }
@@ -186,6 +227,7 @@ export default function App() {
         onLogout={handleLogout}
         onHome={() => setAtHome(true)}
         onAllProducts={() => setShowAll(true)}
+        onFitting={() => openFitting()}
       />
     );
   }

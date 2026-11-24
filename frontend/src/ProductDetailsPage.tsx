@@ -15,6 +15,7 @@ interface Props {
   productId: number;
   bagCount: number;
   onAddToBag: () => void;
+  onTryOn: (productId: number) => void;
   onBack: () => void;
   onLogout: () => void;
 }
@@ -24,6 +25,7 @@ export default function ProductDetailsPage({
   productId,
   bagCount,
   onAddToBag,
+  onTryOn,
   onBack,
   onLogout,
 }: Props) {
@@ -186,6 +188,15 @@ export default function ProductDetailsPage({
               >
                 {added ? "Added to bag ✓" : `Add to bag (${bagCount})`}
               </button>
+              {product.imageKey && (
+                <button
+                  type="button"
+                  className="shop-btn ghost"
+                  onClick={() => onTryOn(product.id)}
+                >
+                  Try it on in the fitting room
+                </button>
+              )}
               {needsSize && !soldOut && (
                 <p className="detail-hint">Choose a size to add this to your bag.</p>
               )}

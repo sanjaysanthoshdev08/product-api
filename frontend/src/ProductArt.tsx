@@ -101,6 +101,12 @@ export const IMAGE_KEYS = Object.keys(SHAPES);
 
 const FALLBACK = "tshirt";
 
+// Just the garment shapes (200x200 box), for drawing on the fitting-room model.
+export function Garment({ imageKey, color }: { imageKey?: string | null; color?: string }) {
+  const key = imageKey && SHAPES[imageKey] ? imageKey : FALLBACK;
+  return SHAPES[key](colorHex(color ?? "Grey"), "rgba(0,0,0,0.38)");
+}
+
 export default function ProductArt({ imageKey, color, className }: Props) {
   const key = imageKey && SHAPES[imageKey] ? imageKey : FALLBACK;
   const fill = colorHex(color ?? "Grey");

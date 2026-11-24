@@ -16,6 +16,7 @@ interface Props {
   onLogout: () => void;
   onHome: () => void;
   onAllProducts: () => void;
+  onFitting: () => void;
 }
 
 export default function ProductsPage({
@@ -28,6 +29,7 @@ export default function ProductsPage({
   onLogout,
   onHome,
   onAllProducts,
+  onFitting,
 }: Props) {
   const isAdmin = session.role === "ADMIN";
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -138,6 +140,9 @@ export default function ProductsPage({
           </button>
           <button type="button" className="nav-link" onClick={onAllProducts}>
             All Products
+          </button>
+          <button type="button" className="nav-link" onClick={onFitting}>
+            Fitting Room
           </button>
         </NavMenu>
       </header>

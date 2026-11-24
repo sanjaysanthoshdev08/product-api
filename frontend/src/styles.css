@@ -1355,3 +1355,238 @@ select {
   background: var(--bg);
   color: var(--text);
 }
+
+/* =====================================================================
+   Fitting room
+   ===================================================================== */
+button.shop-btn.ghost {
+  padding: 0.7rem 1.2rem;
+  background: transparent;
+  border: 1px solid #111;
+  color: #111;
+  font-weight: 600;
+}
+
+button.shop-btn.ghost:hover {
+  background: #111;
+  color: #fff;
+}
+
+.fit-grid {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.fit-stage {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.fit-canvas {
+  transform-origin: 50% 25%;
+  transition: transform 0.25s ease;
+}
+
+.fit-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fit-zoom {
+  position: absolute;
+  top: 0.9rem;
+  left: 0.9rem;
+  z-index: 2;
+  display: grid;
+  gap: 0.4rem;
+}
+
+button.shop-btn.round {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  min-height: 0;
+  padding: 0;
+  background: #fff;
+  color: #111;
+  border: 1px solid #d4d4d8;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.fit-side {
+  display: grid;
+  gap: 1rem;
+}
+
+.fit-card,
+.fit-hanger {
+  background: #fff;
+  border-radius: 24px;
+  padding: 1.1rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  display: grid;
+  gap: 0.8rem;
+}
+
+.fit-card h2,
+.fit-hanger h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.fit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.fit-item {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #eee;
+}
+
+.fit-thumb {
+  background: var(--shop-surface);
+  border-radius: 14px;
+  padding: 0.3rem;
+  aspect-ratio: 1 / 1;
+}
+
+.fit-thumb svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fit-info {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  min-width: 0;
+}
+
+.fit-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.fit-meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+button.shop-btn.x-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  min-height: 0;
+  padding: 0;
+  background: #111;
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.swatches.small button.shop-btn.swatch {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.swatches.small button.shop-btn.swatch i {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.chips.small button.shop-btn.chip {
+  min-width: 2.2rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.fit-total {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.05rem;
+}
+
+.fit-hanger {
+  grid-column: 1 / -1;
+}
+
+.fit-hanger-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.hanger-row {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.4rem;
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.hanger-row li {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+button.shop-btn.hanger-item {
+  width: 7.5rem;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  background: var(--shop-surface);
+  color: #111;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+button.shop-btn.hanger-item svg {
+  width: 100%;
+  height: auto;
+}
+
+button.shop-btn.hanger-item:hover {
+  background: #e8e8ec;
+}
+
+button.shop-btn.hanger-item.on {
+  background: #fff;
+  border-color: #111;
+}
+
+@media (max-width: 800px) {
+  .fit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
