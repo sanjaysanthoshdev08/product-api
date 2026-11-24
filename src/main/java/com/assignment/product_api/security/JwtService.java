@@ -3,6 +3,7 @@ package com.assignment.product_api.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -15,8 +16,14 @@ public class JwtService {
     private static final String SECRET_KEY =
             "MyVerySecretKeyForProductApiJwtAuthentication2026";
 
-    private static final long EXPIRATION_TIME =
-            1000 * 60 * 60; // 1 hour
+    // How long a login stays valid (default 7 days). Set
+    // app.jwt.expiration-hours to change it.
+    private final long expirationMillis;
+
+    public JwtService(
+            @Value("${app.jwt.expiration-hours:168}") long expirationHours) {
+        this.expirationMillis = expirationHours * 60 * 60 * 1000;
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(
@@ -32,7 +39,7 @@ public class JwtService {
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(
-                        System.currentTimeMillis() + EXPIRATION_TIME
+                        System.currentTimeMillis() + expirationMillis
                 ))
                 .signWith(getSigningKey())
                 .compact();

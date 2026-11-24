@@ -20,7 +20,10 @@ const STORAGE_KEY = "product-api-session";
 
 function loadSession(): AuthResponse | null {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    // localStorage keeps you signed in after closing the browser; fall back to
+    // sessionStorage for sessions saved by older versions.
+    const raw =
+      localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as AuthResponse) : null;
   } catch {
     return null;
@@ -44,7 +47,7 @@ export default function App() {
 
   function handleLogin(auth: AuthResponse) {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
     } catch {
       // storage unavailable: session lasts until reload
     }
@@ -54,6 +57,7 @@ export default function App() {
 
   function handleLogout() {
     try {
+      localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
