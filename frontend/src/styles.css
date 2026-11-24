@@ -979,3 +979,37 @@ button.menu-btn {
     padding-inline: 1rem;
   }
 }
+
+/* Login: show/hide password eye button */
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 2.75rem;
+}
+
+button.eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+button.eye-btn:hover {
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.06);
+}
