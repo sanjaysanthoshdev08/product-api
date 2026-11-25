@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { ApiError, fetchProducts } from "./api";
 import type { AuthResponse, Product } from "./api";
-import { CATEGORY_TABS, colorHex, money, productRef, splitList } from "./fashion";
+import { CATEGORY_TABS, colorHex, imageList, money, productRef, splitList } from "./fashion";
 import type { CategoryKey } from "./fashion";
 import ProductArt, { Garment } from "./ProductArt";
 
@@ -114,10 +114,196 @@ const POSES: Pose[] = [
   },
 ];
 
+// Where each drawing's outline sits inside its 200x200 box. A real photo is
+// cut out, then stretched onto the same part of the mannequin.
+const EXTENT: Record<string, { x0: number; y0: number; x1: number; y1: number }> = {
+  jacket: { x0: 24, y0: 26, x1: 176, y1: 172 },
+  tshirt: { x0: 28, y0: 32, x1: 172, y1: 170 },
+  shirt: { x0: 28, y0: 32, x1: 172, y1: 172 },
+  hoodie: { x0: 26, y0: 20, x1: 174, y1: 172 },
+  sweater: { x0: 24, y0: 32, x1: 176, y1: 170 },
+  jeans: { x0: 50, y0: 24, x1: 150, y1: 176 },
+  shorts: { x0: 48, y0: 36, x1: 152, y1: 124 },
+  skirt: { x0: 36, y0: 48, x1: 164, y1: 156 },
+  dress: { x0: 42, y0: 24, x1: 158, y1: 176 },
+};
+
+// Product photos have a plain light backdrop. Remove it once (flood fill from
+// the edges), trim to the garment and keep the result, so the real photo can
+// be shown on the mannequin.
+const cutoutCache = new Map<string, Promise<string | null>>();
+
+function makeCutout(src: string): Promise<string | null> {
+  let job = cutoutCache.get(src);
+  if (!job) {
+    job = new Promise<string | null>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const W = 560;
+          const H = Math.round((img.naturalHeight * W) / img.naturalWidth);
+          const canvas = document.createElement("canvas");
+          canvas.width = W;
+          canvas.height = H;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          if (!ctx) return resolve(null);
+          ctx.drawImage(img, 0, 0, W, H);
+          const data = ctx.getImageData(0, 0, W, H);
+          const px = data.data;
+          // backdrop colour = average of the four corners
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          const corners = [0, W - 1, (H - 1) * W, H * W - 1];
+          corners.forEach((c) => {
+            r += px[c * 4];
+            g += px[c * 4 + 1];
+            b += px[c * 4 + 2];
+          });
+          r /= 4;
+          g /= 4;
+          b /= 4;
+          const dist = (i: number) =>
+            Math.hypot(px[i * 4] - r, px[i * 4 + 1] - g, px[i * 4 + 2] - b);
+          // Grow the backdrop from the edges. A step to a neighbouring pixel is
+          // allowed while the colour changes smoothly (soft shadows) and stays
+          // fairly close to the backdrop; a garment edge is a sharp step.
+          const SEED = 40;
+          const LIMIT = 140;
+          const STEP = 10;
+          const step = (i: number, j: number) =>
+            Math.hypot(
+              px[i * 4] - px[j * 4],
+              px[i * 4 + 1] - px[j * 4 + 1],
+              px[i * 4 + 2] - px[j * 4 + 2],
+            );
+          const gone = new Uint8Array(W * H);
+          const stack: number[] = [];
+          const seed = (i: number) => {
+            if (!gone[i] && dist(i) <= SEED) {
+              gone[i] = 1;
+              stack.push(i);
+            }
+          };
+          const grow = (from: number, to: number) => {
+            if (!gone[to] && dist(to) <= LIMIT && step(from, to) <= STEP) {
+              gone[to] = 1;
+              stack.push(to);
+            }
+          };
+          for (let x = 0; x < W; x++) {
+            seed(x);
+            seed((H - 1) * W + x);
+          }
+          for (let y = 0; y < H; y++) {
+            seed(y * W);
+            seed(y * W + W - 1);
+          }
+          while (stack.length) {
+            const i = stack.pop() as number;
+            const x = i % W;
+            if (x > 0) grow(i, i - 1);
+            if (x < W - 1) grow(i, i + 1);
+            if (i >= W) grow(i, i - W);
+            if (i < W * (H - 1)) grow(i, i + W);
+          }
+          // shave 3px off the garment edge so no pale rim of backdrop is left
+          for (let pass = 0; pass < 3; pass++) {
+            const edge: number[] = [];
+            for (let i = 0; i < W * H; i++) {
+              if (gone[i]) continue;
+              const x = i % W;
+              if (
+                (x > 0 && gone[i - 1]) ||
+                (x < W - 1 && gone[i + 1]) ||
+                (i >= W && gone[i - W]) ||
+                (i < W * (H - 1) && gone[i + W])
+              ) {
+                edge.push(i);
+              }
+            }
+            edge.forEach((i) => {
+              gone[i] = 1;
+            });
+          }
+          let minX = W;
+          let minY = H;
+          let maxX = 0;
+          let maxY = 0;
+          for (let i = 0; i < W * H; i++) {
+            if (gone[i]) {
+              px[i * 4 + 3] = 0;
+            } else {
+              const x = i % W;
+              const y = (i - x) / W;
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+          if (maxX <= minX || maxY <= minY) return resolve(null);
+          ctx.putImageData(data, 0, 0);
+          const out = document.createElement("canvas");
+          out.width = maxX - minX + 1;
+          out.height = maxY - minY + 1;
+          out
+            .getContext("2d")
+            ?.drawImage(canvas, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
+          resolve(out.toDataURL("image/png"));
+        } catch {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+    cutoutCache.set(src, job);
+  }
+  return job;
+}
+
+// undefined = still working, null = no usable cut-out, string = ready
+function useCutout(src: string | undefined): string | null | undefined {
+  const [url, setUrl] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!src) {
+      setUrl(null);
+      return;
+    }
+    let live = true;
+    setUrl(undefined);
+    makeCutout(src).then((u) => {
+      if (live) setUrl(u);
+    });
+    return () => {
+      live = false;
+    };
+  }, [src]);
+  return url;
+}
+
 function GarmentOnModel({ worn, pose }: { worn: Worn; pose: Pose }) {
   const key = worn.product.imageKey ?? "";
+  const photo = imageList(worn.product.imageUrl)[0];
+  const cut = useCutout(photo);
   const box = pose.boxes[key];
-  if (!box) return null;
+  const ext = EXTENT[key];
+  if (!box || !ext) return null;
+  if (photo && cut === undefined) return null; // cutting out the photo
+  const spread = slotOf(worn.product) === "top" ? 1.14 : 1;
+  if (cut) {
+    return (
+      <image
+        href={cut}
+        x={box.x + (box.w * ext.x0) / 200 - (box.w * (ext.x1 - ext.x0) * (spread - 1)) / 400}
+        y={box.y + (box.h * ext.y0) / 200}
+        width={(box.w * (ext.x1 - ext.x0) * spread) / 200}
+        height={(box.h * (ext.y1 - ext.y0)) / 200}
+        preserveAspectRatio="none"
+      />
+    );
+  }
   return (
     <svg
       x={box.x}
@@ -719,7 +905,7 @@ export default function FittingRoomPage({
                               title={p.name}
                               aria-label={p.name}
                             >
-                              <ProductArt imageKey={p.imageKey} color={splitList(p.colors)[0]} />
+                              <ProductArt imageKey={p.imageKey} imageUrl={p.imageUrl} color={splitList(p.colors)[0]} />
                             </button>
                           </li>
                         );
@@ -782,7 +968,7 @@ export default function FittingRoomPage({
                               aria-label={w.product.name}
                               aria-pressed={slot === activeSlot}
                             >
-                              <ProductArt imageKey={w.product.imageKey} color={w.color} />
+                              <ProductArt imageKey={w.product.imageKey} imageUrl={w.product.imageUrl} color={w.color} />
                             </button>
                             {slot === activeSlot && (
                               <button
