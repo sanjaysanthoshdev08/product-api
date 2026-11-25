@@ -255,3 +255,72 @@ export async function generateTryOn(
   if (!res.ok) throw new ApiError(res.status, await readError(res));
   return res.blob();
 }
+
+// ---- Outfit looks: ready-made realistic pictures ---------------------------
+export interface Look {
+  id: number;
+  productIds: number[];
+  pose: string;
+  createdAt: string;
+}
+
+// The picture for exactly these products on this pose, or null when none exists.
+export async function fetchLookMatch(
+  token: string,
+  productIds: number[],
+  pose: string,
+  signal?: AbortSignal,
+): Promise<Blob | null> {
+  const res = await fetch(
+    `/api/v1/looks/match?ids=${productIds.join(",")}&pose=${encodeURIComponent(pose)}`,
+    { headers: { Authorization: `Bearer ${token}` }, signal },
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  return res.blob();
+}
+
+export async function listLooks(token: string): Promise<Look[]> {
+  const res = await fetch("/api/v1/looks", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  return res.json();
+}
+
+export async function fetchLookImage(token: string, id: number): Promise<Blob> {
+  const res = await fetch(`/api/v1/looks/${id}/image`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  return res.blob();
+}
+
+// ADMIN only
+export async function uploadLook(
+  token: string,
+  productIds: number[],
+  pose: string,
+  file: File,
+): Promise<Look> {
+  const form = new FormData();
+  form.append("productIds", productIds.join(","));
+  form.append("pose", pose);
+  form.append("file", file);
+  const res = await fetch("/api/v1/looks", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+  return res.json();
+}
+
+// ADMIN only
+export async function deleteLook(token: string, id: number): Promise<void> {
+  const res = await fetch(`/api/v1/looks/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new ApiError(res.status, await readError(res));
+}

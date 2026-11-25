@@ -1,0 +1,102 @@
+/* Admin page: Outfit looks */
+.looks-page .looks-card {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.looks-card h2,
+.looks-card h3 {
+  margin: 0;
+}
+
+.looks-card h3 {
+  font-size: 1rem;
+  margin-top: 0.4rem;
+}
+
+.looks-help {
+  margin: 0;
+  color: #555;
+  font-size: 0.92rem;
+}
+
+.looks-products,
+.looks-poses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.looks-page button.looks-chip {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #bbb;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.looks-page button.looks-chip.on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.looks-preview {
+  max-width: 220px;
+  max-height: 340px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f1f1f3;
+}
+
+.looks-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.looks-ok {
+  color: #1b7f3b;
+}
+
+.looks-err {
+  color: #b3261e;
+}
+
+.looks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.looks-list li {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.looks-list img,
+.looks-nothumb {
+  width: 72px;
+  height: 108px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #f1f1f3;
+  flex: none;
+}
+
+.looks-list li > div {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: start;
+}
+
+.looks-list span {
+  color: #666;
+  font-size: 0.85rem;
+}
