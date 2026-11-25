@@ -1,5 +1,6 @@
 package com.assignment.product_api.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,6 +33,10 @@ public class Product {
 
     // Which built-in illustration to show, e.g. "jacket", "jeans"
     private String imageKey;
+
+    // Optional link to the product page, e.g. "View Product"
+    @Column(length = 500)
+    private String productUrl;
 
     public Product() {
     }
@@ -114,5 +119,13 @@ public class Product {
 
     public void setImageKey(String imageKey) {
         this.imageKey = imageKey;
+    }
+
+    public String getProductUrl() {
+        return productUrl;
+    }
+
+    public void setProductUrl(String productUrl) {
+        this.productUrl = productUrl;
     }
 }

@@ -21,6 +21,7 @@ export interface Product {
   colors?: string | null; // comma separated, e.g. "Brown,Black"
   sizes?: string | null; // comma separated, e.g. "S,M,L"
   imageKey?: string | null; // built-in illustration, e.g. "jacket"
+  productUrl?: string | null; // link shown as "View Product"
 }
 
 export interface ProductPage {

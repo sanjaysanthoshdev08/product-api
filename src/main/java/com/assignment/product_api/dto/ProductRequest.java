@@ -37,6 +37,9 @@ public class ProductRequest {
     @Size(max = 50, message = "Image key is too long")
     private String imageKey;
 
+    @Size(max = 500, message = "Product URL is too long")
+    private String productUrl;
+
     public ProductRequest() {
     }
 
@@ -109,5 +112,13 @@ public class ProductRequest {
 
     public void setImageKey(String imageKey) {
         this.imageKey = imageKey;
+    }
+
+    public String getProductUrl() {
+        return productUrl;
+    }
+
+    public void setProductUrl(String productUrl) {
+        this.productUrl = productUrl;
     }
 }

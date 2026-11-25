@@ -2059,3 +2059,19 @@ button.shop-btn.ghost:hover {
     width: 5.2rem;
   }
 }
+
+/* "View Product" link on the product details page */
+a.shop-btn.view-link {
+  display: inline-block;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid #111;
+  color: #111;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+a.shop-btn.view-link:hover {
+  background: #111;
+  color: #fff;
+}

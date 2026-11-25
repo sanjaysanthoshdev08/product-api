@@ -197,6 +197,16 @@ export default function ProductDetailsPage({
                   Try it on in the fitting room
                 </button>
               )}
+              {product.productUrl && (
+                <a
+                  className="shop-btn ghost view-link"
+                  href={product.productUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Product
+                </a>
+              )}
               {needsSize && !soldOut && (
                 <p className="detail-hint">Choose a size to add this to your bag.</p>
               )}

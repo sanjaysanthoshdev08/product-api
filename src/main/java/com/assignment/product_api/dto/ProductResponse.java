@@ -13,6 +13,7 @@ public class ProductResponse {
     private String colors;
     private String sizes;
     private String imageKey;
+    private String productUrl;
 
     public ProductResponse() {
     }
@@ -107,5 +108,13 @@ public class ProductResponse {
 
     public void setImageKey(String imageKey) {
         this.imageKey = imageKey;
+    }
+
+    public String getProductUrl() {
+        return productUrl;
+    }
+
+    public void setProductUrl(String productUrl) {
+        this.productUrl = productUrl;
     }
 }
