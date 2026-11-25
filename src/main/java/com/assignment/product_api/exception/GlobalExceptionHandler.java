@@ -41,6 +41,15 @@ public class GlobalExceptionHandler {
                 exception.getMessage(), request);
     }
 
+    @ExceptionHandler(TryOnException.class)
+    public ResponseEntity<ErrorResponse> handleTryOn(
+            TryOnException exception,
+            HttpServletRequest request) {
+
+        return build(exception.getStatus(), "Try-on failed",
+                exception.getMessage(), request);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException exception,
