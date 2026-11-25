@@ -14,6 +14,7 @@ public class ProductResponse {
     private String sizes;
     private String imageKey;
     private String productUrl;
+    private String imageUrl;
 
     public ProductResponse() {
     }
@@ -116,5 +117,13 @@ public class ProductResponse {
 
     public void setProductUrl(String productUrl) {
         this.productUrl = productUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

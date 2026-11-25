@@ -22,6 +22,7 @@ export interface Product {
   sizes?: string | null; // comma separated, e.g. "S,M,L"
   imageKey?: string | null; // built-in illustration, e.g. "jacket"
   productUrl?: string | null; // link shown as "View Product"
+  imageUrl?: string | null; // real photo path/URL, e.g. /images/zara/x.jpg
 }
 
 export interface ProductPage {

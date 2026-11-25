@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { colorHex } from "./fashion";
 
 interface Props {
   imageKey?: string | null;
+  imageUrl?: string | null; // real photo; the drawing shows if it is missing
   color?: string; // color name, e.g. "Brown"
   className?: string;
 }
@@ -107,7 +109,20 @@ export function Garment({ imageKey, color }: { imageKey?: string | null; color?:
   return SHAPES[key](colorHex(color ?? "Grey"), "rgba(0,0,0,0.38)");
 }
 
-export default function ProductArt({ imageKey, color, className }: Props) {
+export default function ProductArt({ imageKey, imageUrl, color, className }: Props) {
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [imageUrl]);
+  if (imageUrl && !broken) {
+    return (
+      <img
+        className={`product-photo${className ? " " + className : ""}`}
+        src={imageUrl}
+        alt=""
+        loading="lazy"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
   const key = imageKey && SHAPES[imageKey] ? imageKey : FALLBACK;
   const fill = colorHex(color ?? "Grey");
   return (

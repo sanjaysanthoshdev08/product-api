@@ -116,7 +116,7 @@ export default function ProductDetailsPage({
         ) : product ? (
           <main className="detail-grid">
             <section className="detail-art">
-              <ProductArt imageKey={product.imageKey} color={color ?? undefined} />
+              <ProductArt imageKey={product.imageKey} imageUrl={product.imageUrl} color={color ?? undefined} />
             </section>
 
             <section className="detail-panel">

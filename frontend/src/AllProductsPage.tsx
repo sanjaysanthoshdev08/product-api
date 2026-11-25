@@ -210,6 +210,7 @@ export default function AllProductsPage({
                           <span className="product-card-art">
                             <ProductArt
                               imageKey={p.imageKey}
+                              imageUrl={p.imageUrl}
                               color={colors[0]}
                             />
                             {out && <span className="sold-out">Sold out</span>}

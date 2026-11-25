@@ -40,6 +40,9 @@ public class ProductRequest {
     @Size(max = 500, message = "Product URL is too long")
     private String productUrl;
 
+    @Size(max = 500, message = "Image URL is too long")
+    private String imageUrl;
+
     public ProductRequest() {
     }
 
@@ -120,5 +123,13 @@ public class ProductRequest {
 
     public void setProductUrl(String productUrl) {
         this.productUrl = productUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

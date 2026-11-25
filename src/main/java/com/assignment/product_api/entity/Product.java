@@ -38,6 +38,10 @@ public class Product {
     @Column(length = 500)
     private String productUrl;
 
+    // Real photo: a path like /images/zara/x.jpg or a full URL
+    @Column(length = 500)
+    private String imageUrl;
+
     public Product() {
     }
 
@@ -127,5 +131,13 @@ public class Product {
 
     public void setProductUrl(String productUrl) {
         this.productUrl = productUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

@@ -70,6 +70,9 @@ public class ProductService {
         product.setColors(blankToNull(request.getColors()));
         product.setSizes(blankToNull(request.getSizes()));
         product.setImageKey(blankToNull(request.getImageKey()));
+        if (request.getImageUrl() != null) {
+            product.setImageUrl(blankToNull(request.getImageUrl()));
+        }
         // Keep the existing link when the form does not send one
         if (request.getProductUrl() != null) {
             product.setProductUrl(blankToNull(request.getProductUrl()));
@@ -89,6 +92,7 @@ public class ProductService {
                 product.getImageKey()
         );
         response.setProductUrl(product.getProductUrl());
+        response.setImageUrl(product.getImageUrl());
         return response;
     }
 
