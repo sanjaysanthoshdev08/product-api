@@ -29,9 +29,9 @@ export default function LooksPage({ session, onBack, onLogout }: Props) {
   const [looks, setLooks] = useState<Look[]>([]);
   const [thumbs, setThumbs] = useState<Record<number, string>>({});
   const [picked, setPicked] = useState<number[]>([]);
-  const [pose, setPose] = useState("crossed");
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  // One picture per pose; any slot can be left empty
+  const [files, setFiles] = useState<Record<string, File | null>>({});
+  const [previews, setPreviews] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -84,14 +84,15 @@ export default function LooksPage({ session, onBack, onLogout }: Props) {
   }, [reload]);
 
   useEffect(() => {
-    if (!file) {
-      setPreview(null);
-      return;
-    }
-    const u = URL.createObjectURL(file);
-    setPreview(u);
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
+    const urls: Record<string, string> = {};
+    Object.entries(files).forEach(([pose, f]) => {
+      if (f) urls[pose] = URL.createObjectURL(f);
+    });
+    setPreviews(urls);
+    return () => Object.values(urls).forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
+
+  const chosen = POSES.filter((p) => files[p.id]);
 
   function toggle(id: number) {
     setPicked((p) =>
@@ -100,19 +101,30 @@ export default function LooksPage({ session, onBack, onLogout }: Props) {
   }
 
   async function save() {
-    if (picked.length === 0 || !file || busy) return;
+    if (picked.length === 0 || chosen.length === 0 || busy) return;
     setBusy(true);
     setMessage(null);
+    let done = 0;
     try {
-      await uploadLook(session.token, picked, pose, file);
-      setMessage({ ok: true, text: "Saved. The fitting room will now show this picture." });
+      for (const p of chosen) {
+        await uploadLook(session.token, picked, p.id, files[p.id] as File);
+        done += 1;
+      }
+      setMessage({
+        ok: true,
+        text: `Saved ${done} picture${done === 1 ? "" : "s"}. The fitting room will now show them.`,
+      });
       setPicked([]);
-      setFile(null);
-      await reload();
+      setFiles({});
     } catch (err) {
-      fail(err);
+      if (done > 0) {
+        setMessage({ ok: false, text: `${done} saved, then: ${err instanceof ApiError ? err.message : "failed"}` });
+      } else {
+        fail(err);
+      }
     } finally {
       setBusy(false);
+      await reload();
     }
   }
 
@@ -151,9 +163,9 @@ export default function LooksPage({ session, onBack, onLogout }: Props) {
       <main className="card looks-card">
         <h2>Add a realistic picture</h2>
         <p className="looks-help">
-          1. Pick the products that are worn in the picture (1 to 4). 2. Choose the pose of the
-          mannequin. 3. Upload the picture (JPG, PNG or WebP, up to 8 MB). Users who put on the
-          same products on the same pose will see it when they click “Make it realistic”.
+          1. Pick the products that are worn in the pictures (1 to 4). 2. Upload one picture for each
+          pose you made (JPG, PNG or WebP, up to 8 MB each). Users who put on the same products
+          on the same pose will see it when they click “Make it realistic”.
         </p>
 
         <h3>1. Products in the picture</h3>
@@ -171,32 +183,41 @@ export default function LooksPage({ session, onBack, onLogout }: Props) {
           ))}
         </div>
 
-        <h3>2. Mannequin pose</h3>
-        <div className="looks-poses">
+        <h3>2. Pictures (one for each pose you have; leave the others empty)</h3>
+        <div className="looks-slots">
           {POSES.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={pose === p.id ? "looks-chip on" : "looks-chip"}
-              onClick={() => setPose(p.id)}
-              aria-pressed={pose === p.id}
-            >
-              {p.label}
-            </button>
+            <div key={p.id} className="looks-slot">
+              <strong>{p.label}</strong>
+              {previews[p.id] ? (
+                <img className="looks-preview" src={previews[p.id]} alt={`${p.label} preview`} />
+              ) : (
+                <div className="looks-empty">No picture</div>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-label={`Picture for ${p.label}`}
+                onChange={(e) => {
+                  const picked = e.target.files?.[0] ?? null;
+                  setFiles((old) => ({ ...old, [p.id]: picked }));
+                }}
+              />
+              {files[p.id] && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setFiles((old) => ({ ...old, [p.id]: null }))}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
           ))}
         </div>
 
-        <h3>3. Picture</h3>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-        {preview && <img className="looks-preview" src={preview} alt="Preview" />}
-
         <div className="looks-actions">
-          <button onClick={save} disabled={busy || picked.length === 0 || !file}>
-            {busy ? "Saving…" : "Save picture"}
+          <button onClick={save} disabled={busy || picked.length === 0 || chosen.length === 0}>
+            {busy ? "Saving…" : chosen.length > 1 ? `Save ${chosen.length} pictures` : "Save picture"}
           </button>
           {message && (
             <span className={message.ok ? "looks-ok" : "looks-err"} role="status">

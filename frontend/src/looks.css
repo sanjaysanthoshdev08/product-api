@@ -100,3 +100,35 @@
   color: #666;
   font-size: 0.85rem;
 }
+
+/* One picture slot per pose */
+.looks-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.8rem;
+}
+
+.looks-slot {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+}
+
+.looks-slot input[type="file"] {
+  max-width: 100%;
+  font-size: 0.8rem;
+}
+
+.looks-empty {
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 210px;
+  border-radius: 12px;
+  background: #f1f1f3;
+  color: #999;
+  font-size: 0.8rem;
+}
