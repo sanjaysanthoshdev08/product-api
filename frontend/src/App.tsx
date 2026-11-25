@@ -5,6 +5,7 @@ import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
 import FittingRoomPage from "./FittingRoomPage";
 import OutfitPage from "./OutfitPage";
+import LooksPage from "./LooksPage";
 import { OUTFIT_SLOTS, loadOutfit, saveOutfit } from "./outfit";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import HomePage from "./HomePage";
@@ -63,6 +64,8 @@ export default function App() {
   // My Outfit page: the picked product ids (max 4) and whether the page is open
   const [outfitIds, setOutfitIds] = useState<number[]>(loadOutfit);
   const [outfitOpen, setOutfitOpen] = useState(false);
+  // Admin page for ready-made realistic outfit pictures
+  const [looksOpen, setLooksOpen] = useState(false);
 
   function openOutfit() {
     setSelectedId(null);
@@ -135,6 +138,7 @@ export default function App() {
     setFitting(false);
     setTryOnId(null);
     setOutfitOpen(false);
+    setLooksOpen(false);
     setAtHome(true);
     setView("home");
   }, []);
@@ -193,6 +197,15 @@ export default function App() {
         <AddProductPage
           session={session}
           onDone={() => setAdding(false)}
+          onLogout={handleLogout}
+        />
+      );
+    }
+    if (looksOpen && session.role === "ADMIN") {
+      return (
+        <LooksPage
+          session={session}
+          onBack={() => setLooksOpen(false)}
           onLogout={handleLogout}
         />
       );
@@ -304,6 +317,7 @@ export default function App() {
         onAllProducts={() => setShowAll(true)}
         onFitting={() => openFitting()}
         onOutfit={openOutfit}
+        onLooks={() => setLooksOpen(true)}
       />
     );
   }

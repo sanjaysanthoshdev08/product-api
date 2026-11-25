@@ -18,6 +18,7 @@ interface Props {
   onAllProducts: () => void;
   onFitting: () => void;
   onOutfit?: () => void;
+  onLooks?: () => void; // ADMIN only: Outfit looks page
 }
 
 export default function ProductsPage({
@@ -32,6 +33,7 @@ export default function ProductsPage({
   onAllProducts,
   onFitting,
   onOutfit,
+  onLooks,
 }: Props) {
   const isAdmin = session.role === "ADMIN";
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -146,6 +148,11 @@ export default function ProductsPage({
           <button type="button" className="nav-link" onClick={onFitting}>
             Fitting Room
           </button>
+          {isAdmin && onLooks && (
+            <button type="button" className="nav-link" onClick={onLooks}>
+              Outfit Looks
+            </button>
+          )}
           {onOutfit && (
             <button type="button" className="nav-link" onClick={onOutfit}>
               My Outfit

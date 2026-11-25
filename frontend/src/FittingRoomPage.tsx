@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { ApiError, fetchProducts, generateTryOn } from "./api";
+import { ApiError, fetchLookMatch, fetchProducts, generateTryOn } from "./api";
 import type { AuthResponse, Product } from "./api";
 import { CATEGORY_TABS, colorHex, imageList, money, productRef, splitList } from "./fashion";
 import type { CategoryKey } from "./fashion";
 import ProductArt, { Garment } from "./ProductArt";
 
 const FETCH_SIZE = 100;
+const NO_LOOK =
+  "No realistic picture is ready for this outfit on this pose yet. An admin can add one in Products → Outfit Looks.";
 const PARAMS_KEY = "product-api-fitting-params";
 
 // Mannequin photos are 971 x 1620 px; every position below is in those pixels.
@@ -790,7 +792,11 @@ export default function FittingRoomPage({
     .map((k) => outfit[k]?.product)
     .filter((p): p is Product => Boolean(p && p.imageUrl))
     .map((p) => p.id);
-  const aiIdsKey = aiIds.join(",");
+  // Everything worn on the body: used to look for a ready-made picture
+  const lookIds = (["top", "bottom", "dress"] as Slot[])
+    .map((k) => outfit[k]?.product.id)
+    .filter((id): id is number => id !== undefined);
+  const aiIdsKey = lookIds.join(",");
 
   // a new outfit or pose makes the old AI picture stale
   useEffect(() => {
@@ -811,12 +817,25 @@ export default function FittingRoomPage({
   }, [aiError]);
 
   async function makeRealistic() {
-    if (aiIds.length === 0 || aiBusy) return;
+    if (lookIds.length === 0 || aiBusy) return;
     const run = ++aiRun.current;
     setAiBusy(true);
     setAiError(null);
     try {
-      const blob = await generateTryOn(session.token, aiIds, poseId);
+      // 1) a ready-made picture an admin uploaded for exactly this outfit and pose
+      let blob = await fetchLookMatch(session.token, lookIds, poseId);
+      // 2) otherwise ask the AI service, when the server has one set up
+      if (!blob) {
+        if (aiIds.length === 0) throw new ApiError(404, NO_LOOK);
+        try {
+          blob = await generateTryOn(session.token, aiIds, poseId);
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 503) {
+            throw new ApiError(404, NO_LOOK);
+          }
+          throw err;
+        }
+      }
       if (run !== aiRun.current) return;
       setAiUrl((old) => {
         if (old) URL.revokeObjectURL(old);
@@ -1094,7 +1113,7 @@ export default function FittingRoomPage({
                   type="button"
                   className="fr-ai-btn"
                   onClick={makeRealistic}
-                  disabled={aiBusy || aiIds.length === 0}
+                  disabled={aiBusy || lookIds.length === 0}
                   title="Make a realistic picture of this outfit on the mannequin"
                 >
                   {aiBusy ? "Creating…" : aiUrl ? "Make again" : "Make it realistic"}
@@ -1105,10 +1124,10 @@ export default function FittingRoomPage({
                   </button>
                 )}
                 {aiBusy && <span className="fr-ai-hint">This can take up to 30 seconds.</span>}
-                {!aiBusy && aiIds.length === 0 && (
-                  <span className="fr-ai-hint">Put on a product with a photo to use this.</span>
+                {!aiBusy && lookIds.length === 0 && (
+                  <span className="fr-ai-hint">Put on a top or trousers to use this.</span>
                 )}
-                {!aiBusy && pose.aiOnly && aiIds.length > 0 && !aiUrl && (
+                {!aiBusy && pose.aiOnly && lookIds.length > 0 && !aiUrl && (
                   <span className="fr-ai-hint">The side view only shows as a realistic picture.</span>
                 )}
               </div>
