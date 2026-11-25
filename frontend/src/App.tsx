@@ -4,6 +4,8 @@ import AllProductsPage from "./AllProductsPage";
 import AddProductPage from "./AddProductPage";
 import EditProductPage from "./EditProductPage";
 import FittingRoomPage from "./FittingRoomPage";
+import OutfitPage from "./OutfitPage";
+import { OUTFIT_SLOTS, loadOutfit, saveOutfit } from "./outfit";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import HomePage from "./HomePage";
 import LoginPage from "./LoginPage";
@@ -56,6 +58,29 @@ export default function App() {
   // Fitting room: open flag, plus a product to put on the model when it opens
   const [fitting, setFitting] = useState(false);
   const [tryOnId, setTryOnId] = useState<number | null>(null);
+  // My Outfit page: the picked product ids (max 4) and whether the page is open
+  const [outfitIds, setOutfitIds] = useState<number[]>(loadOutfit);
+  const [outfitOpen, setOutfitOpen] = useState(false);
+
+  function openOutfit() {
+    setSelectedId(null);
+    setFitting(false);
+    setAtHome(false);
+    setOutfitOpen(true);
+  }
+
+  function updateOutfit(next: number[]) {
+    setOutfitIds(next);
+    saveOutfit(next);
+  }
+
+  function toggleOutfit(id: number) {
+    if (outfitIds.includes(id)) {
+      updateOutfit(outfitIds.filter((x) => x !== id));
+    } else if (outfitIds.length < OUTFIT_SLOTS) {
+      updateOutfit([...outfitIds, id]);
+    }
+  }
 
   function openFitting(productId: number | null = null) {
     setSelectedId(null);
@@ -106,6 +131,7 @@ export default function App() {
     setShowAll(false);
     setFitting(false);
     setTryOnId(null);
+    setOutfitOpen(false);
     setAtHome(true);
     setView("home");
   }, []);
@@ -144,6 +170,7 @@ export default function App() {
             setAtHome(false);
           }}
           onOpenFitting={() => openFitting()}
+          onOpenOutfit={openOutfit}
           onLogout={handleLogout}
         />
       );
@@ -163,6 +190,37 @@ export default function App() {
         <AddProductPage
           session={session}
           onDone={() => setAdding(false)}
+          onLogout={handleLogout}
+        />
+      );
+    }
+    if (outfitOpen) {
+      return (
+        <OutfitPage
+          session={session}
+          outfitIds={outfitIds}
+          onRemove={(id) => updateOutfit(outfitIds.filter((x) => x !== id))}
+          onClear={() => updateOutfit([])}
+          onHome={() => {
+            setOutfitOpen(false);
+            setAtHome(true);
+          }}
+          onProducts={() => {
+            setOutfitOpen(false);
+            setShowAll(false);
+          }}
+          onAllProducts={() => {
+            setOutfitOpen(false);
+            setShowAll(true);
+          }}
+          onFitting={() => {
+            setOutfitOpen(false);
+            openFitting();
+          }}
+          onSelectProduct={(id) => {
+            setOutfitOpen(false);
+            setSelectedId(id);
+          }}
           onLogout={handleLogout}
         />
       );
@@ -198,6 +256,10 @@ export default function App() {
           bagCount={bagCount}
           onAddToBag={handleAddToBag}
           onTryOn={(id) => openFitting(id)}
+          inOutfit={outfitIds.includes(selectedId)}
+          outfitFull={outfitIds.length >= OUTFIT_SLOTS}
+          onToggleOutfit={() => toggleOutfit(selectedId)}
+          onOpenOutfit={openOutfit}
           onBack={() => setSelectedId(null)}
           onLogout={handleLogout}
         />
@@ -213,6 +275,7 @@ export default function App() {
           onHome={() => setAtHome(true)}
           onProducts={() => setShowAll(false)}
           onFitting={() => openFitting()}
+          onOutfit={openOutfit}
         />
       );
     }
@@ -228,6 +291,7 @@ export default function App() {
         onHome={() => setAtHome(true)}
         onAllProducts={() => setShowAll(true)}
         onFitting={() => openFitting()}
+        onOutfit={openOutfit}
       />
     );
   }

@@ -9,6 +9,7 @@ interface Props {
   onOpenProducts?: () => void;
   onOpenAllProducts?: () => void;
   onOpenFitting?: () => void;
+  onOpenOutfit?: () => void;
   onLogout?: () => void;
 }
 
@@ -19,6 +20,7 @@ export default function HomePage({
   onOpenProducts,
   onOpenAllProducts,
   onOpenFitting,
+  onOpenOutfit,
   onLogout,
 }: Props) {
   const signedIn = username !== undefined;
@@ -79,6 +81,13 @@ export default function HomePage({
             onClick={signedIn ? onOpenFitting : onLogin}
           >
             Fitting Room
+          </button>
+          <button
+            type="button"
+            className="nav-link"
+            onClick={signedIn ? onOpenOutfit : onLogin}
+          >
+            My Outfit
           </button>
         </NavMenu>
       </header>

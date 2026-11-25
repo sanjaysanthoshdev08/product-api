@@ -16,6 +16,7 @@ interface Props {
   onHome: () => void;
   onProducts: () => void;
   onFitting: () => void;
+  onOutfit?: () => void;
 }
 
 export default function AllProductsPage({
@@ -26,6 +27,7 @@ export default function AllProductsPage({
   onHome,
   onProducts,
   onFitting,
+  onOutfit,
 }: Props) {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +152,11 @@ export default function AllProductsPage({
             <button type="button" className="nav-link" onClick={onFitting}>
               Fitting Room
             </button>
+            {onOutfit && (
+              <button type="button" className="nav-link" onClick={onOutfit}>
+                My Outfit
+              </button>
+            )}
           </NavMenu>
         </header>
 

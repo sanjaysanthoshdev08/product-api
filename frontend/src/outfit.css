@@ -101,7 +101,7 @@
   width: 100%;
   aspect-ratio: 2 / 3;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  mix-blend-mode: darken;
   filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.22));
   transition: transform 0.25s;
 }
@@ -240,4 +240,33 @@ button.outfit-clear:hover {
     grid-column: 1 / -1;
     order: 3;
   }
+}
+
+/* The nav sits on the dark backdrop, so it needs light text */
+.outfit-top,
+.outfit-top .brand,
+.outfit-top .nav-link,
+.outfit-top .user span,
+.outfit-top .user small {
+  color: #f1f1f4;
+}
+
+.outfit-top .nav-link.active {
+  border-bottom-color: #f1f1f4;
+}
+
+.outfit-top .menu-btn {
+  color: #111;
+}
+
+/* Feather the photo edges so the garment seems to hang on the poster */
+.outfit-piece img {
+  -webkit-mask-image: radial-gradient(ellipse 62% 60% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 60% at 50% 50%, #000 62%, transparent 100%);
+}
+
+.outfit-top button.secondary {
+  color: #f1f1f4;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: transparent;
 }

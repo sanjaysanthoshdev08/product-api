@@ -17,6 +17,11 @@ interface Props {
   bagCount: number;
   onAddToBag: () => void;
   onTryOn: (productId: number) => void;
+  // My Outfit (optional so the page still works without it)
+  inOutfit?: boolean;
+  outfitFull?: boolean;
+  onToggleOutfit?: () => void;
+  onOpenOutfit?: () => void;
   onBack: () => void;
   onLogout: () => void;
 }
@@ -27,6 +32,10 @@ export default function ProductDetailsPage({
   bagCount,
   onAddToBag,
   onTryOn,
+  inOutfit = false,
+  outfitFull = false,
+  onToggleOutfit,
+  onOpenOutfit,
   onBack,
   onLogout,
 }: Props) {
@@ -229,6 +238,25 @@ export default function ProductDetailsPage({
                   onClick={() => onTryOn(product.id)}
                 >
                   Try it on in the fitting room
+                </button>
+              )}
+              {onToggleOutfit && (
+                <button
+                  type="button"
+                  className="shop-btn ghost"
+                  onClick={onToggleOutfit}
+                  disabled={outfitFull && !inOutfit}
+                >
+                  {inOutfit
+                    ? "Remove from my outfit"
+                    : outfitFull
+                      ? "Outfit is full (4 of 4)"
+                      : "Add to my outfit"}
+                </button>
+              )}
+              {inOutfit && onOpenOutfit && (
+                <button type="button" className="shop-btn ghost" onClick={onOpenOutfit}>
+                  View my outfit
                 </button>
               )}
               {product.productUrl && (
