@@ -7,8 +7,6 @@ export type CategoryKey = "ALL" | "MEN" | "WOMEN" | "KIDS";
 export const CATEGORY_TABS: { key: CategoryKey; label: string }[] = [
   { key: "ALL", label: "All" },
   { key: "MEN", label: "Men" },
-  { key: "WOMEN", label: "Ladies" },
-  { key: "KIDS", label: "Kids" },
 ];
 
 export function categoryLabel(category: string | null | undefined): string {

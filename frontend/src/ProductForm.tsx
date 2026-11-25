@@ -95,8 +95,6 @@ export default function ProductForm({
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">None</option>
           <option value="MEN">Men</option>
-          <option value="WOMEN">Ladies</option>
-          <option value="KIDS">Kids</option>
         </select>
       </label>
       <label>
