@@ -299,44 +299,193 @@ function useCutout(src: string | undefined): Cutout | null | undefined {
   return url;
 }
 
+// ---- making the photo look worn -------------------------------------------
+// The mannequin photo already has real light and shadow on its body. We read
+// that shading and apply it to the garment (so the chest, arms and legs show
+// through as volume), and darken the garment edges a little for depth.
+interface BodyShade {
+  w: number;
+  h: number;
+  lum: Float32Array;
+  ref: number;
+}
+
+const bodyShadeCache = new Map<string, Promise<BodyShade | null>>();
+
+function loadBodyShade(pose: Pose): Promise<BodyShade | null> {
+  let job = bodyShadeCache.get(pose.id);
+  if (!job) {
+    job = new Promise<BodyShade | null>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const c = document.createElement("canvas");
+          c.width = pose.w;
+          c.height = pose.h;
+          const ctx = c.getContext("2d", { willReadFrequently: true });
+          if (!ctx) return resolve(null);
+          ctx.drawImage(img, 0, 0, pose.w, pose.h);
+          const d = ctx.getImageData(0, 0, pose.w, pose.h).data;
+          const lum = new Float32Array(pose.w * pose.h);
+          let sum = 0;
+          let n = 0;
+          for (let i = 0; i < lum.length; i++) {
+            const l = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+            lum[i] = l;
+            if (l < 235) {
+              sum += l;
+              n++;
+            }
+          }
+          resolve({ w: pose.w, h: pose.h, lum, ref: n ? sum / n : 150 });
+        } catch {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = pose.src;
+    });
+    bodyShadeCache.set(pose.id, job);
+  }
+  return job;
+}
+
+function loadImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+const shadedCache = new WeakMap<Cutout, Map<string, Promise<string | null>>>();
+
+function shadeGarment(cut: Cutout, pose: Pose, r: Box): Promise<string | null> {
+  let perCut = shadedCache.get(cut);
+  if (!perCut) {
+    perCut = new Map();
+    shadedCache.set(cut, perCut);
+  }
+  const k = `${pose.id}|${Math.round(r.x)},${Math.round(r.y)},${Math.round(r.w)},${Math.round(r.h)}`;
+  let job = perCut.get(k);
+  if (!job) {
+    job = Promise.all([loadBodyShade(pose), loadImage(cut.url)]).then(([body, img]) => {
+      if (!body || !img) return null;
+      try {
+        const SCALE = 0.8;
+        const ow = Math.max(2, Math.round(r.w * SCALE));
+        const oh = Math.max(2, Math.round(r.h * SCALE));
+        const c = document.createElement("canvas");
+        c.width = ow;
+        c.height = oh;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return null;
+        ctx.drawImage(img, 0, 0, ow, oh);
+        const data = ctx.getImageData(0, 0, ow, oh);
+        const d = data.data;
+        // blurred copy of the outline: used to darken the garment near its edge
+        const blur = document.createElement("canvas");
+        blur.width = ow;
+        blur.height = oh;
+        const bctx = blur.getContext("2d", { willReadFrequently: true });
+        if (!bctx) return null;
+        bctx.filter = "blur(8px)";
+        bctx.drawImage(c, 0, 0);
+        const bd = bctx.getImageData(0, 0, ow, oh).data;
+        for (let y = 0; y < oh; y++) {
+          for (let x = 0; x < ow; x++) {
+            const i = y * ow + x;
+            if (d[i * 4 + 3] === 0) continue;
+            const bx = Math.min(body.w - 1, Math.max(0, Math.round(r.x + (x / ow) * r.w)));
+            const by = Math.min(body.h - 1, Math.max(0, Math.round(r.y + (y / oh) * r.h)));
+            const L = body.lum[by * body.w + bx];
+            // off the body (e.g. a sleeve hanging past the arm) = slightly shaded
+            let f = L >= 238 ? 0.9 : 1 + 0.85 * (L / body.ref - 1);
+            f = Math.min(1.3, Math.max(0.55, f));
+            const ao = 0.82 + 0.18 * (bd[i * 4 + 3] / 255);
+            const m = f * ao;
+            d[i * 4] = Math.min(255, d[i * 4] * m);
+            d[i * 4 + 1] = Math.min(255, d[i * 4 + 1] * m);
+            d[i * 4 + 2] = Math.min(255, d[i * 4 + 2] * m);
+          }
+        }
+        ctx.putImageData(data, 0, 0);
+        return c.toDataURL("image/png");
+      } catch {
+        return null;
+      }
+    });
+    perCut.set(k, job);
+  }
+  return job;
+}
+
+function useShaded(cut: Cutout | null | undefined, pose: Pose, r: Box | null): string | null {
+  const [url, setUrl] = useState<string | null>(null);
+  const key = r ? `${Math.round(r.x)},${Math.round(r.y)},${Math.round(r.w)},${Math.round(r.h)}` : "";
+  useEffect(() => {
+    if (!cut || !r) {
+      setUrl(null);
+      return;
+    }
+    let live = true;
+    setUrl(null);
+    shadeGarment(cut, pose, r).then((u) => {
+      if (live) setUrl(u);
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cut, pose.id, key]);
+  return url;
+}
+
+// Where a product photo is placed on this body: fills the shoulder width (or
+// the waist-to-ankle length) and keeps the photo's own proportions.
+function photoRect(key: string, pose: Pose, cut: Cutout): Box | null {
+  const kind: FitKind = (
+    ["jacket", "tshirt", "shirt", "hoodie", "sweater"].includes(key) ? "top" : key
+  ) as FitKind;
+  const t = pose.fit[kind];
+  if (!t) return null;
+  const tw = t.x1 - t.x0;
+  const th = t.y1 - t.y0;
+  const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+  let w: number;
+  let h: number;
+  if (kind === "top" || kind === "dress") {
+    w = tw;
+    h = clamp((w * cut.h) / cut.w, th * 0.7, th * 1.08);
+  } else {
+    h = th;
+    w = clamp((h * cut.w) / cut.h, tw * 0.9, tw * 1.25);
+  }
+  return { x: t.x0 + (tw - w) / 2, y: t.y0, w, h };
+}
+
 function GarmentOnModel({ worn, pose }: { worn: Worn; pose: Pose }) {
   const key = worn.product.imageKey ?? "";
   const photo = imageList(worn.product.imageUrl)[0];
   const cut = useCutout(photo);
   const box = pose.boxes[key];
+  const rect = cut ? photoRect(key, pose, cut) : null;
+  const shaded = useShaded(cut, pose, rect);
   if (!box) return null;
   if (photo && cut === undefined) return null; // cutting out the photo
-  if (cut) {
-    const kind: FitKind = (
-      ["jacket", "tshirt", "shirt", "hoodie", "sweater"].includes(key) ? "top" : key
-    ) as FitKind;
-    const t = pose.fit[kind];
-    if (t) {
-      const tw = t.x1 - t.x0;
-      const th = t.y1 - t.y0;
-      const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-      let w: number;
-      let h: number;
-      if (kind === "top" || kind === "dress") {
-        // fill the shoulder-to-sleeve width, keep the photo's own proportions
-        w = tw;
-        h = clamp((w * cut.h) / cut.w, th * 0.7, th * 1.08);
-      } else {
-        // fill the waist-to-ankle length, keep the photo's own proportions
-        h = th;
-        w = clamp((h * cut.w) / cut.h, tw * 0.9, tw * 1.25);
-      }
-      return (
-        <image
-          href={cut.url}
-          x={t.x0 + (tw - w) / 2}
-          y={t.y0}
-          width={w}
-          height={h}
-          preserveAspectRatio="none"
-        />
-      );
-    }
+  if (cut && rect) {
+    return (
+      <image
+        href={shaded ?? cut.url}
+        x={rect.x}
+        y={rect.y}
+        width={rect.w}
+        height={rect.h}
+        preserveAspectRatio="none"
+        style={{ filter: "drop-shadow(0px 7px 9px rgba(0,0,0,0.30))" }}
+      />
+    );
   }
   return (
     <svg
