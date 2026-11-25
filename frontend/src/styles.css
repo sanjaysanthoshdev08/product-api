@@ -2099,3 +2099,51 @@ img.product-photo {
   width: calc(100% - 1rem);
   height: calc(100% - 1rem);
 }
+
+/* Front / back photos: back shows on card hover, thumbnails on the details page */
+.product-card-art img.photo-back {
+  opacity: 0;
+  background: var(--shop-surface);
+  transition: opacity 0.25s;
+}
+
+.product-card:hover .product-card-art img.photo-back {
+  opacity: 1;
+}
+
+.detail-art {
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.photo-thumbs {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+button.photo-thumb {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  width: 72px;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  color: #444;
+}
+
+button.photo-thumb.active {
+  border-color: #111;
+}
+
+button.photo-thumb img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+}

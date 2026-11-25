@@ -112,11 +112,12 @@ export function Garment({ imageKey, color }: { imageKey?: string | null; color?:
 export default function ProductArt({ imageKey, imageUrl, color, className }: Props) {
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [imageUrl]);
-  if (imageUrl && !broken) {
+  const photo = imageUrl?.split(",")[0].trim();
+  if (photo && !broken) {
     return (
       <img
         className={`product-photo${className ? " " + className : ""}`}
-        src={imageUrl}
+        src={photo}
         alt=""
         loading="lazy"
         onError={() => setBroken(true)}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ApiError, fetchProducts } from "./api";
 import type { AuthResponse, Product } from "./api";
-import { CATEGORY_TABS, colorHex, money, splitList } from "./fashion";
+import { CATEGORY_TABS, colorHex, imageList, money, splitList } from "./fashion";
 import type { CategoryKey } from "./fashion";
 import NavMenu from "./NavMenu";
 import ProductArt from "./ProductArt";
@@ -213,6 +213,15 @@ export default function AllProductsPage({
                               imageUrl={p.imageUrl}
                               color={colors[0]}
                             />
+                            {imageList(p.imageUrl)[1] && (
+                              <img
+                                className="product-photo photo-back"
+                                src={imageList(p.imageUrl)[1]}
+                                alt=""
+                                loading="lazy"
+                                onError={(e) => e.currentTarget.remove()}
+                              />
+                            )}
                             {out && <span className="sold-out">Sold out</span>}
                           </span>
                           <span className="product-card-name">{p.name}</span>

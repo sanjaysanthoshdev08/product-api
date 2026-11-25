@@ -4,6 +4,7 @@ import type { AuthResponse, Product } from "./api";
 import {
   categoryLabel,
   colorHex,
+  imageList,
   money,
   productRef,
   splitList,
@@ -36,6 +37,8 @@ export default function ProductDetailsPage({
   const [color, setColor] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const [failedPhotos, setFailedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,6 +50,8 @@ export default function ProductDetailsPage({
         setProduct(result);
         setColor(splitList(result.colors)[0] ?? null);
         setSize(null);
+        setPhotoIdx(0);
+        setFailedPhotos([]);
         setLoading(false);
       })
       .catch((err: unknown) => {
@@ -68,6 +73,9 @@ export default function ProductDetailsPage({
     return () => controller.abort();
   }, [session.token, productId, reloadKey, onLogout]);
 
+  const photos = imageList(product?.imageUrl).filter((u) => !failedPhotos.includes(u));
+  const photoLabels = ["Front", "Back", "Detail", "Detail 2"];
+  const shownPhoto = photos[Math.min(photoIdx, photos.length - 1)];
   const colors = splitList(product?.colors);
   const sizes = splitList(product?.sizes);
   const soldOut = (product?.quantity ?? 0) <= 0;
@@ -116,7 +124,33 @@ export default function ProductDetailsPage({
         ) : product ? (
           <main className="detail-grid">
             <section className="detail-art">
-              <ProductArt imageKey={product.imageKey} imageUrl={product.imageUrl} color={color ?? undefined} />
+              {shownPhoto ? (
+                <img
+                  className="product-photo"
+                  src={shownPhoto}
+                  alt={product.name}
+                  onError={() => setFailedPhotos((f) => [...f, shownPhoto])}
+                />
+              ) : (
+                <ProductArt imageKey={product.imageKey} color={color ?? undefined} />
+              )}
+              {photos.length > 1 && (
+                <div className="photo-thumbs">
+                  {photos.map((u, i) => (
+                    <button
+                      key={u}
+                      type="button"
+                      className={i === photoIdx ? "photo-thumb active" : "photo-thumb"}
+                      onClick={() => setPhotoIdx(i)}
+                      aria-label={photoLabels[i] ?? `Photo ${i + 1}`}
+                      aria-pressed={i === photoIdx}
+                    >
+                      <img src={u} alt="" />
+                      <span>{photoLabels[i] ?? `Photo ${i + 1}`}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="detail-panel">

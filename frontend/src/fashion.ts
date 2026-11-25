@@ -21,6 +21,11 @@ export function splitList(value: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
+// "/images/a.jpg,/images/a-back.jpg" -> ["/images/a.jpg","/images/a-back.jpg"] (front first, then back)
+export function imageList(value: string | null | undefined): string[] {
+  return splitList(value);
+}
+
 const COLOR_HEX: Record<string, string> = {
   black: "#1c1c1c",
   white: "#f6f6f4",
