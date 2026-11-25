@@ -53,6 +53,14 @@ interface Box {
 
 // One mannequin photo plus where each 200x200 garment drawing is stretched
 // so its outline lands on that mannequin (hand-calibrated per pose).
+type FitKind = "top" | "jeans" | "shorts" | "skirt" | "dress";
+interface Rect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
 interface Pose {
   id: string;
   label: string;
@@ -62,6 +70,8 @@ interface Pose {
   view: Box;
   lens: { x: number; y: number };
   boxes: Record<string, Box>;
+  // where a real product photo is fitted on this body: top, trousers, shorts, skirt, dress
+  fit: Record<FitKind, Rect>;
   // where the two shoes go: vertical position, centres and size
   shoes: { y: number; left: number; right: number; w: number; h: number };
   hat: Box;
@@ -87,6 +97,13 @@ const POSES: Pose[] = [
       skirt: { x: 50, y: 387, w: 840, h: 889 },
       dress: { x: 20, y: 166, w: 900, h: 1120 },
     },
+    fit: {
+      top: { x0: 205, y0: 262, x1: 740, y1: 850 },
+      jeans: { x0: 290, y0: 640, x1: 715, y1: 1440 },
+      shorts: { x0: 295, y0: 640, x1: 705, y1: 1060 },
+      skirt: { x0: 280, y0: 630, x1: 720, y1: 1120 },
+      dress: { x0: 240, y0: 262, x1: 720, y1: 1180 },
+    },
     shoes: { y: 1403, left: 385, right: 665, w: 200, h: 200 },
     hat: { x: 345, y: -37, w: 240, h: 240 },
   },
@@ -109,34 +126,33 @@ const POSES: Pose[] = [
       skirt: { x: 65, y: 422, w: 840, h: 908 },
       dress: { x: 35, y: 151, w: 900, h: 1160 },
     },
+    fit: {
+      top: { x0: 262, y0: 255, x1: 706, y1: 845 },
+      jeans: { x0: 278, y0: 650, x1: 700, y1: 1470 },
+      shorts: { x0: 300, y0: 650, x1: 675, y1: 1060 },
+      skirt: { x0: 285, y0: 640, x1: 690, y1: 1120 },
+      dress: { x0: 270, y0: 255, x1: 700, y1: 1180 },
+    },
     shoes: { y: 1405, left: 335, right: 640, w: 200, h: 200 },
     hat: { x: 365, y: -42, w: 240, h: 240 },
   },
 ];
 
-// Where each drawing's outline sits inside its 200x200 box. A real photo is
-// cut out, then stretched onto the same part of the mannequin.
-const EXTENT: Record<string, { x0: number; y0: number; x1: number; y1: number }> = {
-  jacket: { x0: 24, y0: 26, x1: 176, y1: 172 },
-  tshirt: { x0: 28, y0: 32, x1: 172, y1: 170 },
-  shirt: { x0: 28, y0: 32, x1: 172, y1: 172 },
-  hoodie: { x0: 26, y0: 20, x1: 174, y1: 172 },
-  sweater: { x0: 24, y0: 32, x1: 176, y1: 170 },
-  jeans: { x0: 50, y0: 24, x1: 150, y1: 176 },
-  shorts: { x0: 48, y0: 36, x1: 152, y1: 124 },
-  skirt: { x0: 36, y0: 48, x1: 164, y1: 156 },
-  dress: { x0: 42, y0: 24, x1: 158, y1: 176 },
-};
-
 // Product photos have a plain light backdrop. Remove it once (flood fill from
 // the edges), trim to the garment and keep the result, so the real photo can
 // be shown on the mannequin.
-const cutoutCache = new Map<string, Promise<string | null>>();
+interface Cutout {
+  url: string;
+  w: number;
+  h: number;
+}
 
-function makeCutout(src: string): Promise<string | null> {
+const cutoutCache = new Map<string, Promise<Cutout | null>>();
+
+function makeCutout(src: string): Promise<Cutout | null> {
   let job = cutoutCache.get(src);
   if (!job) {
-    job = new Promise<string | null>((resolve) => {
+    job = new Promise<Cutout | null>((resolve) => {
       const img = new Image();
       img.onload = () => {
         try {
@@ -250,7 +266,7 @@ function makeCutout(src: string): Promise<string | null> {
           out
             .getContext("2d")
             ?.drawImage(canvas, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
-          resolve(out.toDataURL("image/png"));
+          resolve({ url: out.toDataURL("image/png"), w: out.width, h: out.height });
         } catch {
           resolve(null);
         }
@@ -264,8 +280,8 @@ function makeCutout(src: string): Promise<string | null> {
 }
 
 // undefined = still working, null = no usable cut-out, string = ready
-function useCutout(src: string | undefined): string | null | undefined {
-  const [url, setUrl] = useState<string | null | undefined>(undefined);
+function useCutout(src: string | undefined): Cutout | null | undefined {
+  const [url, setUrl] = useState<Cutout | null | undefined>(undefined);
   useEffect(() => {
     if (!src) {
       setUrl(null);
@@ -288,21 +304,39 @@ function GarmentOnModel({ worn, pose }: { worn: Worn; pose: Pose }) {
   const photo = imageList(worn.product.imageUrl)[0];
   const cut = useCutout(photo);
   const box = pose.boxes[key];
-  const ext = EXTENT[key];
-  if (!box || !ext) return null;
+  if (!box) return null;
   if (photo && cut === undefined) return null; // cutting out the photo
-  const spread = slotOf(worn.product) === "top" ? 1.14 : 1;
   if (cut) {
-    return (
-      <image
-        href={cut}
-        x={box.x + (box.w * ext.x0) / 200 - (box.w * (ext.x1 - ext.x0) * (spread - 1)) / 400}
-        y={box.y + (box.h * ext.y0) / 200}
-        width={(box.w * (ext.x1 - ext.x0) * spread) / 200}
-        height={(box.h * (ext.y1 - ext.y0)) / 200}
-        preserveAspectRatio="none"
-      />
-    );
+    const kind: FitKind = (
+      ["jacket", "tshirt", "shirt", "hoodie", "sweater"].includes(key) ? "top" : key
+    ) as FitKind;
+    const t = pose.fit[kind];
+    if (t) {
+      const tw = t.x1 - t.x0;
+      const th = t.y1 - t.y0;
+      const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+      let w: number;
+      let h: number;
+      if (kind === "top" || kind === "dress") {
+        // fill the shoulder-to-sleeve width, keep the photo's own proportions
+        w = tw;
+        h = clamp((w * cut.h) / cut.w, th * 0.7, th * 1.08);
+      } else {
+        // fill the waist-to-ankle length, keep the photo's own proportions
+        h = th;
+        w = clamp((h * cut.w) / cut.h, tw * 0.9, tw * 1.25);
+      }
+      return (
+        <image
+          href={cut.url}
+          x={t.x0 + (tw - w) / 2}
+          y={t.y0}
+          width={w}
+          height={h}
+          preserveAspectRatio="none"
+        />
+      );
+    }
   }
   return (
     <svg
@@ -503,9 +537,11 @@ export default function FittingRoomPage({
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [zoom, setZoom] = useState(1);
   const [mirrored, setMirrored] = useState(false);
-  const [poseId, setPoseId] = useState(POSES[0].id);
+  const [poseId, setPoseId] = useState("crossed");
   const pose = POSES.find((p) => p.id === poseId) ?? POSES[0];
-  const [lens, setLens] = useState(POSES[0].lens);
+  const [lens, setLens] = useState(
+    (POSES.find((p) => p.id === "crossed") ?? POSES[0]).lens,
+  );
   const [note, setNote] = useState<string | null>(null);
   const [params, setParams] = useState<Params>(loadParams);
   const [openAcc, setOpenAcc] = useState<string | null>(null);
