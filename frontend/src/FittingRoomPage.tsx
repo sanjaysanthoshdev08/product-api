@@ -9,14 +9,8 @@ import ProductArt, { Garment } from "./ProductArt";
 const FETCH_SIZE = 100;
 const PARAMS_KEY = "product-api-fitting-params";
 
-// The model photo is 1240 x 1170 px; every position below is in those pixels.
-const IMG_W = 1240;
-const IMG_H = 1170;
-// Crop the photo's empty margins so the model fills the stage.
-const VIEW = { x: 340, y: -30, w: 560, h: 1200 };
-const SKIN = "#c8977a";
-// Same grey as the stage, so the photo's white background disappears
-// (the photo is blended with `multiply`) and cover-up patches match it.
+// Mannequin photos are 971 x 1620 px; every position below is in those pixels.
+// The photos have a white background, which is multiplied onto the stage grey.
 const STAGE_GREY = "#e6e6e8";
 
 type Slot = "top" | "bottom" | "dress" | "shoes" | "hat";
@@ -50,23 +44,79 @@ function slotOf(p: Product): Slot | null {
   return (p.imageKey && SLOT_OF[p.imageKey]) || null;
 }
 
-// Box (photo pixels) each 200x200 garment drawing is stretched into so its
-// outline lands on the matching part of the model.
-const BOXES: Record<string, { x: number; y: number; w: number; h: number }> = {
-  jacket: { x: 382, y: 150, w: 460, h: 460 },
-  tshirt: { x: 392, y: 150, w: 440, h: 440 },
-  shirt: { x: 382, y: 150, w: 460, h: 460 },
-  hoodie: { x: 382, y: 150, w: 460, h: 460 },
-  sweater: { x: 382, y: 150, w: 460, h: 460 },
-  jeans: { x: 322, y: 288, w: 570, h: 895 },
-  shorts: { x: 330, y: 302, w: 555, h: 545 },
-  skirt: { x: 349, y: 267, w: 516, h: 555 },
-  dress: { x: 322, y: 95, w: 570, h: 915 },
-};
+interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
-function GarmentOnModel({ worn }: { worn: Worn }) {
+// One mannequin photo plus where each 200x200 garment drawing is stretched
+// so its outline lands on that mannequin (hand-calibrated per pose).
+interface Pose {
+  id: string;
+  label: string;
+  src: string;
+  w: number;
+  h: number;
+  view: Box;
+  lens: { x: number; y: number };
+  boxes: Record<string, Box>;
+  // where the two shoes go: vertical position, centres and size
+  shoes: { y: number; left: number; right: number; w: number; h: number };
+  hat: Box;
+}
+
+const POSES: Pose[] = [
+  {
+    id: "hips",
+    label: "Hands on hips",
+    src: "/mannequins/pose-hips.webp",
+    w: 971,
+    h: 1620,
+    view: { x: 0, y: 0, w: 971, h: 1620 },
+    lens: { x: 470, y: 450 },
+    boxes: {
+      jacket: { x: 151, y: 173, w: 628, h: 776 },
+      tshirt: { x: 135, y: 181, w: 660, h: 700 },
+      shirt: { x: 151, y: 173, w: 628, h: 776 },
+      hoodie: { x: 151, y: 173, w: 628, h: 776 },
+      sweater: { x: 151, y: 173, w: 628, h: 776 },
+      jeans: { x: 90, y: 474, w: 760, h: 1110 },
+      shorts: { x: 90, y: 420, w: 760, h: 1000 },
+      skirt: { x: 50, y: 387, w: 840, h: 889 },
+      dress: { x: 20, y: 166, w: 900, h: 1120 },
+    },
+    shoes: { y: 1403, left: 385, right: 665, w: 200, h: 200 },
+    hat: { x: 345, y: -37, w: 240, h: 240 },
+  },
+  {
+    id: "crossed",
+    label: "Arms crossed",
+    src: "/mannequins/pose-crossed.webp",
+    w: 971,
+    h: 1619,
+    view: { x: 0, y: 0, w: 971, h: 1619 },
+    lens: { x: 485, y: 430 },
+    boxes: {
+      jacket: { x: 141, y: 134, w: 680, h: 798 },
+      tshirt: { x: 125, y: 142, w: 700, h: 720 },
+      shirt: { x: 141, y: 134, w: 680, h: 798 },
+      hoodie: { x: 141, y: 134, w: 680, h: 798 },
+      sweater: { x: 141, y: 134, w: 680, h: 798 },
+      jeans: { x: 95, y: 509, w: 780, h: 1150 },
+      shorts: { x: 95, y: 448, w: 780, h: 1068 },
+      skirt: { x: 65, y: 422, w: 840, h: 908 },
+      dress: { x: 35, y: 151, w: 900, h: 1160 },
+    },
+    shoes: { y: 1405, left: 335, right: 640, w: 200, h: 200 },
+    hat: { x: 365, y: -42, w: 240, h: 240 },
+  },
+];
+
+function GarmentOnModel({ worn, pose }: { worn: Worn; pose: Pose }) {
   const key = worn.product.imageKey ?? "";
-  const box = BOXES[key];
+  const box = pose.boxes[key];
   if (!box) return null;
   return (
     <svg
@@ -83,15 +133,14 @@ function GarmentOnModel({ worn }: { worn: Worn }) {
   );
 }
 
-function ShoesOnModel({ worn }: { worn: Worn }) {
+function ShoesOnModel({ worn, pose }: { worn: Worn; pose: Pose }) {
   const key = worn.product.imageKey ?? "";
-  const boots = key === "boots";
-  const w = boots ? 150 : 175;
-  const h = boots ? 200 : 190;
+  const { y, left, right, w, h } = pose.shoes;
+  // toes point outwards from the body
   const foot = (cx: number, mirror: boolean) => (
     <svg
       x={cx - w / 2}
-      y={985}
+      y={y}
       width={w}
       height={h}
       viewBox="0 0 200 200"
@@ -105,54 +154,37 @@ function ShoesOnModel({ worn }: { worn: Worn }) {
   );
   return (
     <>
-      <rect x="470" y="1040" width="280" height="130" fill={STAGE_GREY} />
-      {foot(535, false)}
-      {foot(683, true)}
+      {foot(left, true)}
+      {foot(right, false)}
     </>
   );
 }
 
-// The model photo plus whatever she is wearing. Used by the main stage and
+// The mannequin photo plus whatever it is wearing. Used by the main stage and
 // by the round magnifier.
-function Scene({ outfit }: { outfit: Outfit }) {
+function Scene({ outfit, pose }: { outfit: Outfit; pose: Pose }) {
   return (
     <>
       {/* grey base the photo is multiplied onto, so its white background vanishes */}
-      <rect x="-2000" y="-2000" width="5000" height="5000" fill={STAGE_GREY} />
+      <rect x="-2000" y="-2000" width="6000" height="6000" fill={STAGE_GREY} />
       <image
-        href="/fitting-model.webp"
+        href={pose.src}
         x="0"
         y="0"
-        width={IMG_W}
-        height={IMG_H}
+        width={pose.w}
+        height={pose.h}
         style={{ mixBlendMode: "multiply" }}
       />
-      {(outfit.top || outfit.dress) && (
-        <>
-          <rect x="425" y="185" width="112" height="385" fill={STAGE_GREY} />
-          <rect x="698" y="185" width="105" height="385" fill={STAGE_GREY} />
-        </>
-      )}
-      {(outfit.bottom || outfit.dress) && (
-        <rect x="448" y="395" width="324" height="680" fill={STAGE_GREY} />
-      )}
-      {(outfit.dress ||
-        (outfit.bottom && outfit.bottom.product.imageKey !== "jeans")) && (
-        <path
-          d="M548 640 H603 L598 1050 H540 Z M619 640 H674 L683 1050 H625 Z"
-          fill={SKIN}
-        />
-      )}
-      {outfit.bottom && <GarmentOnModel worn={outfit.bottom} />}
-      {outfit.dress && <GarmentOnModel worn={outfit.dress} />}
-      {outfit.top && <GarmentOnModel worn={outfit.top} />}
-      {outfit.shoes && <ShoesOnModel worn={outfit.shoes} />}
+      {outfit.bottom && <GarmentOnModel worn={outfit.bottom} pose={pose} />}
+      {outfit.dress && <GarmentOnModel worn={outfit.dress} pose={pose} />}
+      {outfit.top && <GarmentOnModel worn={outfit.top} pose={pose} />}
+      {outfit.shoes && <ShoesOnModel worn={outfit.shoes} pose={pose} />}
       {outfit.hat && (
         <svg
-          x="505"
-          y="-45"
-          width="210"
-          height="240"
+          x={pose.hat.x}
+          y={pose.hat.y}
+          width={pose.hat.w}
+          height={pose.hat.h}
           viewBox="0 0 200 200"
           preserveAspectRatio="none"
           overflow="visible"
@@ -164,13 +196,13 @@ function Scene({ outfit }: { outfit: Outfit }) {
   );
 }
 
-// Rough women's letter size from a chest measurement (cm)
 function sizeFromChest(chest: number): string {
-  if (chest < 81) return "XS";
-  if (chest <= 88) return "S";
-  if (chest <= 96) return "M";
-  if (chest <= 104) return "L";
-  return "XL";
+  if (chest < 86) return "XS";
+  if (chest <= 94) return "S";
+  if (chest <= 102) return "M";
+  if (chest <= 110) return "L";
+  if (chest <= 118) return "XL";
+  return "XXL";
 }
 
 interface Params {
@@ -180,7 +212,7 @@ interface Params {
   height: string;
 }
 
-const DEFAULT_PARAMS: Params = { chest: "81", waist: "59", hips: "86", height: "168" };
+const DEFAULT_PARAMS: Params = { chest: "98", waist: "82", hips: "98", height: "178" };
 
 function loadParams(): Params {
   try {
@@ -282,7 +314,9 @@ export default function FittingRoomPage({
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [zoom, setZoom] = useState(1);
   const [mirrored, setMirrored] = useState(false);
-  const [lens, setLens] = useState({ x: 612, y: 330 });
+  const [poseId, setPoseId] = useState(POSES[0].id);
+  const pose = POSES.find((p) => p.id === poseId) ?? POSES[0];
+  const [lens, setLens] = useState(POSES[0].lens);
   const [note, setNote] = useState<string | null>(null);
   const [params, setParams] = useState<Params>(loadParams);
   const [openAcc, setOpenAcc] = useState<string | null>(null);
@@ -480,8 +514,8 @@ export default function FittingRoomPage({
     const fx = (e.clientX - r.left) / r.width;
     const fy = (e.clientY - r.top) / r.height;
     setLens({
-      x: VIEW.x + (mirrored ? 1 - fx : fx) * VIEW.w,
-      y: VIEW.y + fy * VIEW.h,
+      x: pose.view.x + (mirrored ? 1 - fx : fx) * pose.view.w,
+      y: pose.view.y + fy * pose.view.h,
     });
   }
 
@@ -573,10 +607,28 @@ export default function FittingRoomPage({
                 </button>
               </div>
 
+              <div className="fr-poses" role="group" aria-label="Choose a pose">
+                {POSES.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={p.id === poseId ? "on" : undefined}
+                    onClick={() => {
+                      setPoseId(p.id);
+                      setLens(p.lens);
+                    }}
+                    aria-pressed={p.id === poseId}
+                    title={p.label}
+                  >
+                    <img src={p.src} alt={p.label} />
+                  </button>
+                ))}
+              </div>
+
               <div className="fr-lens" aria-hidden="true">
                 <svg viewBox={`${lens.x - 70} ${lens.y - 70} 140 140`} width="100%" height="100%">
                   <g transform={mirrored ? `translate(${lens.x * 2},0) scale(-1,1)` : undefined}>
-                    <Scene outfit={outfit} />
+                    <Scene outfit={outfit} pose={pose} />
                   </g>
                 </svg>
               </div>
@@ -591,12 +643,12 @@ export default function FittingRoomPage({
               <div className="fr-model" style={{ transform: `scale(${zoom})` }}>
                 <svg
                   className="fr-model-svg"
-                  viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`}
+                  viewBox={`${pose.view.x} ${pose.view.y} ${pose.view.w} ${pose.view.h}`}
                   role="img"
-                  aria-label="Model wearing your outfit"
+                  aria-label="Mannequin wearing your outfit"
                   style={mirrored ? { transform: "scaleX(-1)" } : undefined}
                 >
-                  <Scene outfit={outfit} />
+                  <Scene outfit={outfit} pose={pose} />
                 </svg>
               </div>
 
