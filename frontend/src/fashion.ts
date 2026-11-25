@@ -39,6 +39,15 @@ const COLOR_HEX: Record<string, string> = {
   olive: "#6b7a3a",
   denim: "#4a6fa5",
   cream: "#f3ead3",
+  maroon: "#7b1e2b",
+  mustard: "#d9a521",
+  teal: "#1f8a8a",
+  emerald: "#1b7f5a",
+  magenta: "#c2185b",
+  turquoise: "#26b5b0",
+  gold: "#c9a227",
+  ivory: "#f6f1e3",
+  rust: "#b5502b",
 };
 
 export function colorHex(name: string): string {
