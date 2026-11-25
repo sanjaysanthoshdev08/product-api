@@ -22,3 +22,10 @@ export function saveOutfit(ids: number[]): void {
     // ignore (private mode etc.)
   }
 }
+
+// Which part of the body a product's picture goes on
+export function slotKind(imageKey: string | null | undefined): "top" | "bottom" | "other" {
+  if (imageKey && ["jacket", "tshirt", "shirt", "hoodie", "sweater"].includes(imageKey)) return "top";
+  if (imageKey && ["jeans", "shorts", "skirt"].includes(imageKey)) return "bottom";
+  return "other";
+}

@@ -3,7 +3,7 @@ import { ApiError, fetchProducts } from "./api";
 import type { AuthResponse, Product } from "./api";
 import { colorHex, imageList, money, splitList } from "./fashion";
 import NavMenu from "./NavMenu";
-import { OUTFIT_SLOTS } from "./outfit";
+import { OUTFIT_SLOTS, slotKind } from "./outfit";
 import ProductArt from "./ProductArt";
 import "./outfit.css";
 
@@ -17,6 +17,7 @@ interface Props {
   onAllProducts: () => void;
   onFitting: () => void;
   onSelectProduct: (id: number) => void;
+  onTryOutfit: (ids: number[]) => void;
   onLogout: () => void;
 }
 
@@ -52,6 +53,7 @@ export default function OutfitPage({
   onAllProducts,
   onFitting,
   onSelectProduct,
+  onTryOutfit,
   onLogout,
 }: Props) {
   const [all, setAll] = useState<Product[] | null>(null);
@@ -76,6 +78,10 @@ export default function OutfitPage({
   const picked = outfitIds
     .map((id) => all?.find((p) => p.id === id))
     .filter((p): p is Product => Boolean(p));
+  // Needs at least one top (shirt, T-shirt, jacket...) and one bottom (trousers...)
+  const hasTop = picked.some((p) => slotKind(p.imageKey) === "top");
+  const hasBottom = picked.some((p) => slotKind(p.imageKey) === "bottom");
+  const canTry = hasTop && hasBottom;
   const total = picked.reduce((sum, p) => sum + Number(p.price), 0);
   const month = new Date()
     .toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -208,6 +214,22 @@ export default function OutfitPage({
             <br />
             NOW
           </button>
+        </div>
+        <div className="outfit-actions">
+          <button
+            type="button"
+            className="outfit-try"
+            disabled={!canTry}
+            onClick={() => onTryOutfit(picked.map((p) => p.id))}
+          >
+            Try this outfit on the mannequin
+          </button>
+          {!canTry && (
+            <p className="outfit-hint">
+              Pick at least one top (shirt, T-shirt, jacket) and one bottom
+              (trousers) to try them on.
+            </p>
+          )}
         </div>
         {picked.length > 0 && (
           <button type="button" className="outfit-clear" onClick={onClear}>

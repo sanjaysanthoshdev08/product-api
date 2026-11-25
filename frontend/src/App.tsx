@@ -58,6 +58,8 @@ export default function App() {
   // Fitting room: open flag, plus a product to put on the model when it opens
   const [fitting, setFitting] = useState(false);
   const [tryOnId, setTryOnId] = useState<number | null>(null);
+  // A whole outfit to put on the mannequin when the fitting room opens
+  const [tryOnIds, setTryOnIds] = useState<number[]>([]);
   // My Outfit page: the picked product ids (max 4) and whether the page is open
   const [outfitIds, setOutfitIds] = useState<number[]>(loadOutfit);
   const [outfitOpen, setOutfitOpen] = useState(false);
@@ -85,6 +87,7 @@ export default function App() {
   function openFitting(productId: number | null = null) {
     setSelectedId(null);
     setTryOnId(productId);
+    setTryOnIds([]);
     setFitting(true);
     setAtHome(false);
   }
@@ -221,6 +224,14 @@ export default function App() {
             setOutfitOpen(false);
             setSelectedId(id);
           }}
+          onTryOutfit={(ids) => {
+            setOutfitOpen(false);
+            setSelectedId(null);
+            setTryOnId(null);
+            setTryOnIds(ids);
+            setFitting(true);
+            setAtHome(false);
+          }}
           onLogout={handleLogout}
         />
       );
@@ -231,6 +242,7 @@ export default function App() {
           session={session}
           bagCount={bagCount}
           initialProductId={tryOnId}
+          initialProductIds={tryOnIds}
           onAddToBag={handleAddToBag}
           onHome={() => {
             setFitting(false);

@@ -292,6 +292,7 @@ export default function FittingRoomPage({
   session,
   bagCount,
   initialProductId,
+  initialProductIds = [],
   onAddToBag,
   onHome,
   onProducts,
@@ -301,6 +302,8 @@ export default function FittingRoomPage({
   session: AuthResponse;
   bagCount: number;
   initialProductId: number | null;
+  // Several products to put on at once (from My Outfit)
+  initialProductIds?: number[];
   onAddToBag: () => void;
   onHome: () => void;
   onProducts: () => void;
@@ -373,6 +376,16 @@ export default function FittingRoomPage({
     if (p) wear(p);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products, initialProductId]);
+
+  // Put a whole outfit on the model (from My Outfit)
+  useEffect(() => {
+    if (!products || initialProductIds.length === 0) return;
+    initialProductIds.forEach((id) => {
+      const p = products.find((x) => x.id === id);
+      if (p) wear(p);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]);
 
   // close the account menu on outside click / Escape
   useEffect(() => {
