@@ -100,6 +100,17 @@ public class SecurityConfig {
                                 "/api/v1/products/**"
                         ).hasRole("ADMIN")
 
+                        // Ready-made outfit pictures: upload / delete -> ADMIN only
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/looks/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/v1/looks/**"
+                        ).hasRole("ADMIN")
+
                         // GET products -> USER or ADMIN
                         .requestMatchers(
                                 HttpMethod.GET,
