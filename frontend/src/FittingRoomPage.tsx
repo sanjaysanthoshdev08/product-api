@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { ApiError, fetchProducts } from "./api";
+import { ApiError, fetchProducts, generateTryOn } from "./api";
 import type { AuthResponse, Product } from "./api";
 import { CATEGORY_TABS, colorHex, imageList, money, productRef, splitList } from "./fashion";
 import type { CategoryKey } from "./fashion";
@@ -75,6 +75,8 @@ interface Pose {
   // where the two shoes go: vertical position, centres and size
   shoes: { y: number; left: number; right: number; w: number; h: number };
   hat: Box;
+  // 3/4 view: the flat preview cannot be fitted, only the AI picture dresses it
+  aiOnly?: boolean;
 }
 
 const POSES: Pose[] = [
@@ -106,6 +108,26 @@ const POSES: Pose[] = [
     },
     shoes: { y: 1403, left: 385, right: 665, w: 200, h: 200 },
     hat: { x: 345, y: -37, w: 240, h: 240 },
+  },
+  {
+    id: "angle",
+    label: "Side view",
+    src: "/mannequins/pose-angle.webp",
+    w: 971,
+    h: 1619,
+    view: { x: 0, y: 0, w: 971, h: 1619 },
+    lens: { x: 480, y: 450 },
+    boxes: {},
+    fit: {
+      top: { x0: 215, y0: 262, x1: 700, y1: 850 },
+      jeans: { x0: 270, y0: 640, x1: 640, y1: 1450 },
+      shorts: { x0: 280, y0: 640, x1: 630, y1: 1060 },
+      skirt: { x0: 260, y0: 630, x1: 650, y1: 1120 },
+      dress: { x0: 230, y0: 262, x1: 660, y1: 1180 },
+    },
+    shoes: { y: 1405, left: 330, right: 560, w: 200, h: 200 },
+    hat: { x: 340, y: -40, w: 240, h: 240 },
+    aiOnly: true,
   },
   {
     id: "crossed",
@@ -544,11 +566,11 @@ function Scene({ outfit, pose }: { outfit: Outfit; pose: Pose }) {
         height={pose.h}
         style={{ mixBlendMode: "multiply" }}
       />
-      {outfit.bottom && <GarmentOnModel worn={outfit.bottom} pose={pose} />}
-      {outfit.dress && <GarmentOnModel worn={outfit.dress} pose={pose} />}
-      {outfit.top && <GarmentOnModel worn={outfit.top} pose={pose} />}
-      {outfit.shoes && <ShoesOnModel worn={outfit.shoes} pose={pose} />}
-      {outfit.hat && (
+      {!pose.aiOnly && outfit.bottom && <GarmentOnModel worn={outfit.bottom} pose={pose} />}
+      {!pose.aiOnly && outfit.dress && <GarmentOnModel worn={outfit.dress} pose={pose} />}
+      {!pose.aiOnly && outfit.top && <GarmentOnModel worn={outfit.top} pose={pose} />}
+      {!pose.aiOnly && outfit.shoes && <ShoesOnModel worn={outfit.shoes} pose={pose} />}
+      {!pose.aiOnly && outfit.hat && (
         <svg
           x={pose.hat.x}
           y={pose.hat.y}
@@ -688,6 +710,11 @@ export default function FittingRoomPage({
   const [mirrored, setMirrored] = useState(false);
   const [poseId, setPoseId] = useState("crossed");
   const pose = POSES.find((p) => p.id === poseId) ?? POSES[0];
+  // AI picture of the outfit on the mannequin ("Make it realistic")
+  const [aiUrl, setAiUrl] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const aiRun = useRef(0);
   const [lens, setLens] = useState(
     (POSES.find((p) => p.id === "crossed") ?? POSES[0]).lens,
   );
@@ -757,6 +784,59 @@ export default function FittingRoomPage({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
+
+  // Products in the outfit that have a photo the AI can use
+  const aiIds = (["top", "bottom", "dress"] as Slot[])
+    .map((k) => outfit[k]?.product)
+    .filter((p): p is Product => Boolean(p && p.imageUrl))
+    .map((p) => p.id);
+  const aiIdsKey = aiIds.join(",");
+
+  // a new outfit or pose makes the old AI picture stale
+  useEffect(() => {
+    aiRun.current += 1;
+    setAiUrl((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return null;
+    });
+    setAiError(null);
+    setAiBusy(false);
+  }, [aiIdsKey, poseId]);
+
+  // the error note goes away by itself
+  useEffect(() => {
+    if (!aiError) return;
+    const t = window.setTimeout(() => setAiError(null), 9000);
+    return () => window.clearTimeout(t);
+  }, [aiError]);
+
+  async function makeRealistic() {
+    if (aiIds.length === 0 || aiBusy) return;
+    const run = ++aiRun.current;
+    setAiBusy(true);
+    setAiError(null);
+    try {
+      const blob = await generateTryOn(session.token, aiIds, poseId);
+      if (run !== aiRun.current) return;
+      setAiUrl((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return URL.createObjectURL(blob);
+      });
+    } catch (err) {
+      if (run !== aiRun.current) return;
+      if (err instanceof ApiError && err.status === 401) {
+        onLogout();
+        return;
+      }
+      setAiError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not reach the server. Is the backend running?",
+      );
+    } finally {
+      if (run === aiRun.current) setAiBusy(false);
+    }
+  }
 
   // close the account menu on outside click / Escape
   useEffect(() => {
@@ -1009,6 +1089,35 @@ export default function FittingRoomPage({
                 ))}
               </div>
 
+              <div className="fr-ai">
+                <button
+                  type="button"
+                  className="fr-ai-btn"
+                  onClick={makeRealistic}
+                  disabled={aiBusy || aiIds.length === 0}
+                  title="Make a realistic picture of this outfit on the mannequin"
+                >
+                  {aiBusy ? "Creating…" : aiUrl ? "Make again" : "Make it realistic"}
+                </button>
+                {aiUrl && (
+                  <button type="button" className="fr-ai-back" onClick={() => setAiUrl(null)}>
+                    Back to preview
+                  </button>
+                )}
+                {aiBusy && <span className="fr-ai-hint">This can take up to 30 seconds.</span>}
+                {!aiBusy && aiIds.length === 0 && (
+                  <span className="fr-ai-hint">Put on a product with a photo to use this.</span>
+                )}
+                {!aiBusy && pose.aiOnly && aiIds.length > 0 && !aiUrl && (
+                  <span className="fr-ai-hint">The side view only shows as a realistic picture.</span>
+                )}
+              </div>
+              {aiError && (
+                <p className="fr-ai-error" role="alert" onClick={() => setAiError(null)}>
+                  {aiError}
+                </p>
+              )}
+
               <div className="fr-lens" aria-hidden="true">
                 <svg viewBox={`${lens.x - 70} ${lens.y - 70} 140 140`} width="100%" height="100%">
                   <g transform={mirrored ? `translate(${lens.x * 2},0) scale(-1,1)` : undefined}>
@@ -1025,6 +1134,16 @@ export default function FittingRoomPage({
               </button>
 
               <div className="fr-model" style={{ transform: `scale(${zoom})` }}>
+                {aiUrl ? (
+                  <div className="fr-ai-wrap" style={{ background: STAGE_GREY }}>
+                    <img
+                      className="fr-model-svg"
+                      src={aiUrl}
+                      alt="Mannequin wearing your outfit"
+                      style={{ mixBlendMode: "multiply", ...(mirrored ? { transform: "scaleX(-1)" } : {}) }}
+                    />
+                  </div>
+                ) : (
                 <svg
                   className="fr-model-svg"
                   viewBox={`${pose.view.x} ${pose.view.y} ${pose.view.w} ${pose.view.h}`}
@@ -1034,6 +1153,7 @@ export default function FittingRoomPage({
                 >
                   <Scene outfit={outfit} pose={pose} />
                 </svg>
+                )}
               </div>
 
               <section className="fr-hanger" aria-label="On a hanger">
