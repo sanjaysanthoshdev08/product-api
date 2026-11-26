@@ -234,28 +234,6 @@ export async function fetchProducts(
   return res.json();
 }
 
-// POST /api/v1/tryon -> the picture of the mannequin wearing the products
-// (image bytes). The backend asks the AI service and stores the result, so a
-// repeated outfit comes back at once. 503 = AI key not set up on the server.
-export async function generateTryOn(
-  token: string,
-  productIds: number[],
-  pose: string,
-  signal?: AbortSignal,
-): Promise<Blob> {
-  const res = await fetch("/api/v1/tryon", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ productIds, pose }),
-    signal,
-  });
-  if (!res.ok) throw new ApiError(res.status, await readError(res));
-  return res.blob();
-}
-
 // ---- Outfit looks: ready-made realistic pictures ---------------------------
 export interface Look {
   id: number;

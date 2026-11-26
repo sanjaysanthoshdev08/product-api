@@ -22,7 +22,7 @@ interface Props {
   onLogout: () => void;
 }
 
-// Admin page: upload a realistic picture (made in Gemini / ChatGPT) for an
+// Admin page: upload a realistic picture (made in any image tool) for an
 // exact set of products. The fitting room shows it when a user picks the same.
 export default function LooksPage({ session, onBack, onLogout }: Props) {
   const [products, setProducts] = useState<Product[]>([]);

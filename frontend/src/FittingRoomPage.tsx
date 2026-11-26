@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { ApiError, fetchLookMatch, fetchProducts, generateTryOn } from "./api";
+import { ApiError, fetchLookMatch, fetchProducts } from "./api";
 import type { AuthResponse, Product } from "./api";
 import { CATEGORY_TABS, colorHex, imageList, money, productRef, splitList } from "./fashion";
 import type { CategoryKey } from "./fashion";
@@ -787,18 +787,13 @@ export default function FittingRoomPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
 
-  // Products in the outfit that have a photo the AI can use
-  const aiIds = (["top", "bottom", "dress"] as Slot[])
-    .map((k) => outfit[k]?.product)
-    .filter((p): p is Product => Boolean(p && p.imageUrl))
-    .map((p) => p.id);
   // Everything worn on the body: used to look for a ready-made picture
   const lookIds = (["top", "bottom", "dress"] as Slot[])
     .map((k) => outfit[k]?.product.id)
     .filter((id): id is number => id !== undefined);
-  const aiIdsKey = lookIds.join(",");
+  const lookKey = lookIds.join(",");
 
-  // a new outfit or pose makes the old AI picture stale
+  // a new outfit or pose makes the old picture stale
   useEffect(() => {
     aiRun.current += 1;
     setAiUrl((old) => {
@@ -807,7 +802,7 @@ export default function FittingRoomPage({
     });
     setAiError(null);
     setAiBusy(false);
-  }, [aiIdsKey, poseId]);
+  }, [lookKey, poseId]);
 
   // the error note goes away by itself
   useEffect(() => {
@@ -822,20 +817,9 @@ export default function FittingRoomPage({
     setAiBusy(true);
     setAiError(null);
     try {
-      // 1) a ready-made picture an admin uploaded for exactly this outfit and pose
-      let blob = await fetchLookMatch(session.token, lookIds, poseId);
-      // 2) otherwise ask the AI service, when the server has one set up
-      if (!blob) {
-        if (aiIds.length === 0) throw new ApiError(404, NO_LOOK);
-        try {
-          blob = await generateTryOn(session.token, aiIds, poseId);
-        } catch (err) {
-          if (err instanceof ApiError && err.status === 503) {
-            throw new ApiError(404, NO_LOOK);
-          }
-          throw err;
-        }
-      }
+      // the ready-made picture an admin uploaded for exactly this outfit and pose
+      const blob = await fetchLookMatch(session.token, lookIds, poseId);
+      if (!blob) throw new ApiError(404, NO_LOOK);
       if (run !== aiRun.current) return;
       setAiUrl((old) => {
         if (old) URL.revokeObjectURL(old);
@@ -1114,16 +1098,15 @@ export default function FittingRoomPage({
                   className="fr-ai-btn"
                   onClick={makeRealistic}
                   disabled={aiBusy || lookIds.length === 0}
-                  title="Make a realistic picture of this outfit on the mannequin"
+                  title="Show the realistic picture of this outfit on the mannequin"
                 >
-                  {aiBusy ? "Creating…" : aiUrl ? "Make again" : "Make it realistic"}
+                  {aiBusy ? "Looking…" : "Make it realistic"}
                 </button>
                 {aiUrl && (
                   <button type="button" className="fr-ai-back" onClick={() => setAiUrl(null)}>
                     Back to preview
                   </button>
                 )}
-                {aiBusy && <span className="fr-ai-hint">This can take up to 30 seconds.</span>}
                 {!aiBusy && lookIds.length === 0 && (
                   <span className="fr-ai-hint">Put on a top or trousers to use this.</span>
                 )}
