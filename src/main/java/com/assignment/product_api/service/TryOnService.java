@@ -69,7 +69,7 @@ public class TryOnService {
             ProductRepository productRepository,
             TryOnResultRepository resultRepository,
             @Value("${app.tryon.gemini-api-key:}") String apiKey,
-            @Value("${app.tryon.model:gemini-2.5-flash-image}") String model,
+            @Value("${app.tryon.model:gemini-3.1-flash-lite-image}") String model,
             @Value("${app.tryon.images-dir:frontend/public}") String imagesDir,
             @Value("${app.tryon.max-per-hour:10}") int maxPerHour) {
         this.productRepository = productRepository;
